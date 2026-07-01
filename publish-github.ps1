@@ -4,11 +4,10 @@ $Root = $PSScriptRoot
 Set-Location -LiteralPath $Root
 
 if (Test-Path -LiteralPath (Join-Path $Root 'ai-secrets.ps1')) {
-    Write-Host 'WARNING: ai-secrets.ps1 exists — it is gitignored, will NOT be pushed.' -ForegroundColor Yellow
+    Write-Host 'NOTE: ai-secrets.ps1 is gitignored and will not be pushed.' -ForegroundColor Yellow
 }
 
 $repo = 'ai-terminals'
-$remote = "https://github.com/DavidPatlas-AI/$repo.git"
 
 if (-not (Test-Path -LiteralPath (Join-Path $Root '.git'))) {
     git init
@@ -17,27 +16,30 @@ if (-not (Test-Path -LiteralPath (Join-Path $Root '.git'))) {
 
 git add .
 git status --short
-$msg = "AI Terminals hub — dashboard, tokens, conversation status, Hebrew UX"
-git commit -m $msg 2>$null
+git commit -m 'AI Terminals hub: dashboard, tokens, conversation status' 2>$null
 if ($LASTEXITCODE -ne 0) {
-    Write-Host 'Nothing new to commit (or commit failed).' -ForegroundColor DarkYellow
+    Write-Host 'Nothing new to commit.' -ForegroundColor DarkYellow
 }
 
 $gh = Get-Command gh -EA SilentlyContinue
 if (-not $gh) {
-    Write-Host 'Install GitHub CLI: winget install GitHub.cli' -ForegroundColor Yellow
-    Write-Host "Then: gh repo create DavidPatlas-AI/$repo --public --source=. --push"
+    Write-Host 'Install GitHub CLI: winget install GitHub.cli'
     exit 1
 }
 
-$exists = gh repo view "DavidPatlas-AI/$repo" 2>$null
+$null = gh repo view "DavidPatlas-AI/$repo" 2>$null
+$exists = ($LASTEXITCODE -eq 0)
+
 if (-not $exists) {
-    gh repo create "DavidPatlas-AI/$repo" --public --source=. --remote=origin --push --description "Windows hub for terminal AI — token dashboard, conversation status, Grok/Claude/Gemini"
+    gh repo create "DavidPatlas-AI/$repo" --public --source=. --remote=origin --push --description "Windows hub for terminal AI with token dashboard"
 } else {
-    if (-not (git remote get-url origin 2>$null)) { git remote add origin $remote }
+    $null = git remote get-url origin 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        git remote add origin "https://github.com/DavidPatlas-AI/$repo.git"
+    }
     git push -u origin main
 }
 
-gh repo edit "DavidPatlas-AI/$repo" --homepage "https://github.com/DavidPatlas-AI/$repo#readme"
+gh repo edit "DavidPatlas-AI/$repo" --homepage "https://github.com/DavidPatlas-AI/$repo"
 Write-Host ''
-Write-Host "Published: https://github.com/DavidPatlas-AI/$repo" -ForegroundColor Green
+Write-Host ('Published: https://github.com/DavidPatlas-AI/' + $repo) -ForegroundColor Green

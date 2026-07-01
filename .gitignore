@@ -1,7 +1,10 @@
 # Secrets — never commit
 ai-secrets.ps1
+*.env
+.env
+.env.*
 
-# Generated at runtime
+# Generated at runtime (may contain paths / session titles)
 status.json
 dashboard.html
 STATUS.txt

@@ -82,6 +82,8 @@ while ($true) {
         '5' { & (Join-Path $ChatRoot 'launch-codex.ps1'); break }
         '6' { Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', (Join-Path $ChatRoot 'open-all.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         '7' { Start-Process -FilePath (Join-Path $ChatRoot 'open-dashboard.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
+        'R' { & (Join-Path $ChatRoot 'refresh-conversations.ps1'); Start-Process (Join-Path $ChatRoot 'open-dashboard.bat'); Read-Host '  Enter'; break }
+        'r' { & (Join-Path $ChatRoot 'refresh-conversations.ps1'); Start-Process (Join-Path $ChatRoot 'open-dashboard.bat'); Read-Host '  Enter'; break }
         'F' { Start-Process -FilePath (Join-Path $ChatRoot 'try-free.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         'f' { Start-Process -FilePath (Join-Path $ChatRoot 'try-free.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         'C' { & (Join-Path $ChatRoot 'launch-crush.ps1'); break }
