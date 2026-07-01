@@ -1,4 +1,4 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-call "%~dp0Crush.bat"
+call "%~dp0AI.bat" crush

@@ -2,5 +2,5 @@
 chcp 65001 >nul
 title Codex AI
 cd /d "%~dp0"
-powershell -NoExit -NoProfile -ExecutionPolicy Bypass -File "%~dp0launch-codex.ps1"
+powershell -NoExit -NoProfile -ExecutionPolicy Bypass -File "%~dp0launch-ai.ps1" -Model codex
 if errorlevel 1 pause

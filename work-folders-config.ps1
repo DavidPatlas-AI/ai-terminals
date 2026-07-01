@@ -10,4 +10,7 @@ $script:WORK_DIR_CLAUDE   = $projects
 $script:WORK_DIR_GEMINI   = $projects
 $script:WORK_DIR_DEEPSEEK = $projects
 $script:WORK_DIR_CRUSH    = $projects
+$script:WORK_DIR_OLLAMA   = $projects
+$script:WORK_DIR_OPENCODE = $projects
+$script:WORK_DIR_NOTEBOOKLM = $projects
 $script:WORK_DIR_PROJECTS = $projects

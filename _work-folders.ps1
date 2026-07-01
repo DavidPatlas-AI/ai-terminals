@@ -143,6 +143,9 @@ function Get-ToolWorkDirectory {
         gemini   = $script:WORK_DIR_GEMINI
         deepseek = $script:WORK_DIR_DEEPSEEK
         crush    = $script:WORK_DIR_CRUSH
+        ollama   = $script:WORK_DIR_OLLAMA
+        opencode = $script:WORK_DIR_OPENCODE
+        notebooklm = $script:WORK_DIR_NOTEBOOKLM
     }
     $fb = $hub
     if ($map.ContainsKey($ToolId)) {

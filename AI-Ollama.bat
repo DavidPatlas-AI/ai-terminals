@@ -1,4 +1,4 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-call "%~dp0Ollama.bat"
+call "%~dp0AI.bat" ollama

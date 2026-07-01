@@ -1,4 +1,4 @@
 @echo off
 chcp 65001 >nul
 cd /d "%~dp0"
-call "%~dp0Grok.bat"
+call "%~dp0AI.bat" grok

@@ -1,11 +1,11 @@
-# Publish AI-Terminals to GitHub — ONLY after security-check passes
+# Publish AI-Terminals to GitHub - ONLY after security-check passes
 $ErrorActionPreference = 'Stop'
 $Root = $PSScriptRoot
 Set-Location -LiteralPath $Root
 
 Write-Host ''
 Write-Host '========================================' -ForegroundColor Cyan
-Write-Host '  פרסום ל-GitHub (ציבורי)' -ForegroundColor Cyan
+Write-Host '  Publish to GitHub (public)' -ForegroundColor Cyan
 Write-Host '========================================' -ForegroundColor Cyan
 Write-Host ''
 Write-Host 'Repo: DavidPatlas-AI/ai-terminals' -ForegroundColor DarkGray
@@ -15,7 +15,7 @@ Write-Host 'Step 1/3: Security check (required)' -ForegroundColor Yellow
 & (Join-Path $Root 'security-check.ps1')
 if ($LASTEXITCODE -ne 0) {
     Write-Host ''
-    Write-Host 'Publish cancelled — fix security issues first.' -ForegroundColor Red
+    Write-Host 'Publish cancelled - fix security issues first.' -ForegroundColor Red
     Write-Host 'Never commit: ai-secrets.ps1, API keys' -ForegroundColor Yellow
     exit 1
 }
