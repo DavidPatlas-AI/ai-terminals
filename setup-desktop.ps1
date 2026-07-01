@@ -1,0 +1,1 @@
+& (Join-Path $PSScriptRoot 'cleanup-desktop.ps1')

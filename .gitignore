@@ -1,0 +1,19 @@
+# Secrets — never commit
+ai-secrets.ps1
+
+# Generated at runtime
+status.json
+dashboard.html
+STATUS.txt
+
+# Windows shortcuts
+*.lnk
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/

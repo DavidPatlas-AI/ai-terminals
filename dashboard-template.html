@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>לוח AI</title>
+<style>
+  :root {
+    --bg: #0c0e12;
+    --surface: #151921;
+    --border: #2a3142;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --ok: #34d399;
+    --wait: #fbbf24;
+    --fail: #f87171;
+    --key: #c084fc;
+    --accent: #6366f1;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .app { max-width: 960px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem; border-bottom: 1px solid var(--border);
+  }
+  header h1 { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; }
+  header .sub { font-size: .8rem; color: var(--muted); margin-top: .15rem; }
+  .refresh {
+    font-size: .78rem; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: .4rem .85rem; border-radius: 8px; cursor: pointer;
+  }
+  .refresh:hover { border-color: var(--accent); color: var(--text); }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem;
+    margin-bottom: 1.75rem;
+  }
+  @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.1rem;
+  }
+  .stat .n { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; }
+  .stat .l { font-size: .72rem; color: var(--muted); margin-top: .2rem; }
+  .stat.warn .n { color: var(--wait); }
+  .stat.ok .n { color: var(--ok); }
+  .stat.bad .n { color: var(--fail); }
+
+  .section-title {
+    font-size: .72rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); margin-bottom: .65rem;
+  }
+
+  .models {
+    display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1.75rem;
+  }
+  .mpill {
+    display: flex; align-items: center; gap: .5rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 999px; padding: .35rem .85rem .35rem .65rem;
+    font-size: .8rem;
+  }
+  .mpill .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .mpill .dot.ok { background: var(--ok); }
+  .mpill .dot.wait { background: var(--wait); }
+  .mpill .dot.fail { background: var(--fail); }
+  .mpill .dot.key { background: var(--key); }
+  .mpill .meta { color: var(--muted); font-size: .72rem; }
+
+  .table-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; margin-bottom: 1.5rem;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th {
+    text-align: right; padding: .7rem 1rem; font-size: .7rem;
+    font-weight: 600; color: var(--muted); background: rgba(0,0,0,.2);
+    border-bottom: 1px solid var(--border);
+  }
+  td { padding: .75rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(99,102,241,.04); }
+  .title-cell {
+    max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-weight: 500;
+  }
+  .mono { font-family: ui-monospace, Consolas, monospace; font-size: .78rem; direction: ltr; text-align: left; }
+  .badge {
+    display: inline-block; padding: .2rem .55rem; border-radius: 6px;
+    font-size: .68rem; font-weight: 600;
+  }
+  .badge.active { background: rgba(52,211,153,.15); color: var(--ok); }
+  .badge.recent { background: rgba(99,102,241,.15); color: #a5b4fc; }
+  .badge.closed { background: rgba(148,163,184,.1); color: var(--muted); }
+  .badge.warning { background: rgba(251,191,36,.15); color: var(--wait); }
+  .badge.critical { background: rgba(248,113,113,.15); color: var(--fail); }
+  .badge.error { background: rgba(248,113,113,.2); color: #fca5a5; }
+  .bar-wrap { display: flex; align-items: center; gap: .5rem; min-width: 100px; }
+  .bar { flex: 1; height: 5px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 99px; background: var(--ok); }
+  .bar i.mid { background: var(--wait); }
+  .bar i.high { background: var(--fail); }
+  .empty { text-align: center; padding: 2.5rem; color: var(--muted); font-size: .85rem; }
+
+  .hint {
+    text-align: center; font-size: .78rem; color: var(--muted);
+    padding: 1rem; border-top: 1px solid var(--border);
+  }
+  .hint a { color: #a5b4fc; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>לוח AI</h1>
+      <div class="sub">טוקנים · סטטוס שיחות · מודלים</div>
+    </div>
+    <button class="refresh" onclick="location.reload()">רענן · <span id="checkedAt">—</span></button>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="section-title">מודלים</div>
+  <div class="models" id="models"></div>
+
+  <div class="section-title">שיחות</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>סטטוס</th>
+          <th>כותרת</th>
+          <th>מנוע</th>
+          <th>טוקנים</th>
+          <th>הקשר</th>
+          <th>עודכן</th>
+        </tr>
+      </thead>
+      <tbody id="convBody"></tbody>
+    </table>
+  </div>
+
+  <div class="hint" id="hint">עדכון מהיר: <strong>refresh-conversations.bat</strong> · מלא: <strong>check-all.bat</strong></div>
+</div>
+<script>
+const DATA = __STATUS_JSON__;
+const STATUS_HE = {
+  active:'פעיל', recent:'לאחרונה', closed:'סגור',
+  warning:'אזהרה', critical:'מלא', error:'שגיאה'
+};
+const MODEL_HE = { ok:'עובד', wait:'מכסה', fail:'לא', key:'מפתח' };
+const COLORS = { grok:'#8b5cf6', claude:'#34d399', gemini:'#60a5fa', deepseek:'#22d3ee', codex:'#fbbf24' };
+const PROVIDER_COLORS = { Grok:'#a78bfa', Claude:'#34d399', Cursor:'#fb923c' };
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+document.getElementById('checkedAt').textContent = DATA.checkedAt || '—';
+
+const s = DATA.tokenSummary || {};
+const active = s.activeCount || 0;
+const highest = s.highestPct || 0;
+const errors = s.errorCount || 0;
+const working = DATA.workingCount || 0;
+
+document.getElementById('stats').innerHTML = [
+  { n: s.tokensActiveFmt || '0', l: 'טוקנים (שיחות פעילות)', c: '' },
+  { n: active, l: 'שיחות פעילות', c: active ? 'ok' : '' },
+  { n: highest + '%', l: 'שימוש מקסימלי בהקשר', c: highest >= 75 ? 'warn' : '' },
+  { n: working + '/' + (DATA.totalCount||5), l: 'מודלים עובדים', c: working === 0 ? 'bad' : (working < 3 ? 'warn' : 'ok') },
+].map(x => `<div class="stat ${x.c}"><div class="n">${esc(String(x.n))}</div><div class="l">${esc(x.l)}</div></div>`).join('');
+
+document.getElementById('models').innerHTML = (DATA.models||[]).map(m => {
+  const c = COLORS[m.id] || '#6366f1';
+  const extra = m.limitReset ? ` · איפוס ${m.limitReset}` : (m.balance ? ` · ${m.balance}` : '');
+  return `<div class="mpill" style="border-color:${c}33">
+    <span class="dot ${esc(m.status)}"></span>
+    <span>${esc(m.name)}</span>
+    <span class="meta">${MODEL_HE[m.status]||m.status}${esc(extra)}</span>
+  </div>`;
+}).join('');
+
+const rows = DATA.conversations || [];
+const body = document.getElementById('convBody');
+if (!rows.length) {
+  body.innerHTML = '<tr><td colspan="6" class="empty">אין שיחות — הרץ check-all.bat</td></tr>';
+} else {
+  body.innerHTML = rows.map(c => {
+    const pct = c.tokensPct || 0;
+    const barCls = pct >= 85 ? 'high' : (pct >= 60 ? 'mid' : '');
+    const bar = c.tokensMax
+      ? `<div class="bar-wrap"><div class="bar"><i class="${barCls}" style="width:${Math.min(100,pct)}%"></i></div><span class="mono">${pct}%</span></div>`
+      : '<span class="mono">—</span>';
+    const tok = (c.tokensUsedFmt && c.tokensMaxFmt && c.tokensMax)
+      ? `${c.tokensUsedFmt} / ${c.tokensMaxFmt}` : (c.tokensUsedFmt || '—');
+    return `<tr>
+      <td><span class="badge ${esc(c.status)}">${STATUS_HE[c.status]||c.status}</span></td>
+      <td class="title-cell" title="${esc(c.title)}">${esc(c.title)}</td>
+      <td style="color:${PROVIDER_COLORS[c.provider]||'#e2e8f0'};font-weight:500">${esc(c.provider)}</td>
+      <td class="mono">${esc(tok)}</td>
+      <td>${bar}</td>
+      <td class="mono">${esc(c.lastActive||'—')}</td>
+    </tr>`;
+  }).join('');
+}
+
+if (errors > 0) {
+  const h = document.getElementById('hint');
+  h.innerHTML = `<span style="color:#fbbf24">⚠ ${errors} שיחות עם שגיאה או מכסה</span> · refresh-conversations.bat`;
+}
+</script>
+</body>
+</html>
