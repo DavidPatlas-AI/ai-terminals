@@ -57,6 +57,7 @@
   check-all.bat           רענון דשבורד + בדיקת מודלים
   setup-keys.bat          מפתחות API (מקומי, לא ב-git)
   NotebookLM.bat          המחברת שלך בטרמינל
+  fix-hebrew-chat.bat     תיקון עברית הפוכה ב-Cursor
   הוראות.txt              מדריך מלא
   publish-github.bat      פרסום ציבורי ל-GitHub
 

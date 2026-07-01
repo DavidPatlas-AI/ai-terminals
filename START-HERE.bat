@@ -22,6 +22,7 @@ echo   3  פתח דשבורד (טוקנים ושיחות)
 echo   4  הגדר מפתחות API
 echo   5  NotebookLM — התקנה / התחברות
 echo   6  בדיקת חיבור מלאה
+echo   7  תיקון עברית הפוכה ב-Cursor
 echo   --------------------------------------------------------
 echo   G  פרסום ל-GitHub (ציבורי)
 echo   S  בדיקת אבטחה לפני פרסום
@@ -37,6 +38,7 @@ if "%c%"=="3" goto dash
 if "%c%"=="4" goto keys
 if "%c%"=="5" goto nblm
 if "%c%"=="6" goto check
+if "%c%"=="7" goto hebrew
 if /i "%c%"=="G" goto publish
 if /i "%c%"=="S" goto security
 if /i "%c%"=="M" goto map
@@ -75,6 +77,10 @@ goto menu
 :check
 call check-all.bat
 pause
+goto menu
+
+:hebrew
+call fix-hebrew-chat.bat
 goto menu
 
 :security

@@ -46,12 +46,17 @@ foreach ($kp in $keyPatterns) {
     }
 }
 
-$toAdd = git ls-files --others --exclude-standard 2>$null
-$modified = git diff --name-only 2>$null
+$prevQuote = $env:GIT_CONFIG_PARAMETERS
+$env:GIT_CONFIG_PARAMETERS = 'core.quotepath=false'
+$toAdd = git -c core.quotepath=false ls-files --others --exclude-standard 2>$null
+$modified = git -c core.quotepath=false diff --name-only 2>$null
+if ($prevQuote) { $env:GIT_CONFIG_PARAMETERS = $prevQuote } else { Remove-Item Env:GIT_CONFIG_PARAMETERS -EA SilentlyContinue }
 $checkList = @()
 if ($toAdd) { $checkList += ($toAdd -split "`n") }
 if ($modified) { $checkList += ($modified -split "`n") }
-foreach ($rel in ($checkList | Where-Object { $_ -and $_ -notmatch '[\x00-\x1f]'})) {
+foreach ($rel in ($checkList | Where-Object {
+    $_ -and $_ -match '^[\x09\x20-\x7E]+$' -and $_ -notmatch '\\[0-7]{3}'
+})) {
     if ($secretFiles -contains $rel) {
         Write-Host "[FAIL] Pending secret file: $rel" -ForegroundColor Red
         $blocked = $true

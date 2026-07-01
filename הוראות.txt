@@ -33,6 +33,10 @@ AI Terminals — מדריך מלא
     notebooklm-login.bat     התחברות Google
     NotebookLM.bat           צ'אט עם המחברת שלך
 
+  עברית הפוכה ב-Cursor:
+    fix-hebrew-chat.bat      תיקון (מנהל, פעם אחת)
+    תקן-עברית-בצאט.bat       אותו דבר
+
 
 ■ תיקיות ישנות — לא לגעת
 -------------------------
