@@ -25,6 +25,16 @@ AI Terminals — מדריך קצר
 
   עדכון: check-all.bat
 
+NotebookLM (המחברת שלך בטרמינל)
+--------------------------------
+
+  NotebookLM.bat           שאל שאלות על המקורות שלך
+  install-notebooklm.bat   התקנה + התחברות Google (פעם אחת)
+  notebooklm-login.bat     התחברות מחדש אם פג תוקף
+
+  מחברת: ca413bde-2973-4125-963e-7e2eaf0ddd95
+  אותה מחברת כמו בדפדפן — עם כל הקבצים שהעלית.
+
 התחלה
 -----
 
@@ -32,5 +42,9 @@ AI Terminals — מדריך קצר
   try-free.bat   אם שום דבר לא עובד (Gemini חינמי)
   setup-keys.bat מפתחות API
 
-תיקייה: Desktop\מודלים טרמנילים
-קיצור:  Desktop\AI-Terminals
+תיקייה: Desktop\AI-Terminals
+GitHub:  github.com/DavidPatlas-AI/ai-terminals
+
+סידור שולחן עבודה: setup-desktop.bat (מוחק בלאגן)
+בדיקת אבטחה: security-check.bat (לפני כל push!)
+פרסום לגיטהאב: publish-github.bat (רק אחרי security-check)

@@ -17,6 +17,7 @@ $models = @(
     Test-GeminiStatus -ApiKey $script:GEMINI_API_KEY
     Test-DeepSeekStatus -ApiKey $script:DEEPSEEK_API_KEY
     Test-CodexStatus
+    Test-NotebookLMStatus
 )
 
 $checked = Get-Date -Format 'yyyy-MM-dd HH:mm'

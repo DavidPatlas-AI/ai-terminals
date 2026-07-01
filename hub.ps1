@@ -54,6 +54,7 @@ function Show-Menu {
     Write-Host '  '; L 'gemini'; Write-Host ' 3  Gemini     (Google)' -ForegroundColor White
     Write-Host '  '; L 'deepseek'; Write-Host ' 4  DeepSeek   (API)' -ForegroundColor White
     Write-Host '  '; L 'codex'; Write-Host ' 5  Codex      (OpenAI)' -ForegroundColor White
+    Write-Host '  '; L 'notebooklm'; Write-Host ' N  NotebookLM (Google - your notebook)' -ForegroundColor Magenta
     Write-Host ''
     Write-Host '  6  כל 5 ביחד (Windows Terminal)' -ForegroundColor Magenta
     Write-Host '  7  לוח AI — טוקנים ושיחות (דשבורד)' -ForegroundColor Cyan
@@ -80,6 +81,8 @@ while ($true) {
         '3' { & (Join-Path $ChatRoot 'launch-gemini.ps1'); break }
         '4' { & (Join-Path $ChatRoot 'launch-deepseek.ps1'); break }
         '5' { & (Join-Path $ChatRoot 'launch-codex.ps1'); break }
+        'N' { & (Join-Path $ChatRoot 'launch-notebooklm.ps1'); break }
+        'n' { & (Join-Path $ChatRoot 'launch-notebooklm.ps1'); break }
         '6' { Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', (Join-Path $ChatRoot 'open-all.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         '7' { Start-Process -FilePath (Join-Path $ChatRoot 'open-dashboard.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         'R' { & (Join-Path $ChatRoot 'refresh-conversations.ps1'); Start-Process (Join-Path $ChatRoot 'open-dashboard.bat'); Read-Host '  Enter'; break }

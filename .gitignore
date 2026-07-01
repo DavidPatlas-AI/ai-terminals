@@ -1,5 +1,6 @@
 # Secrets — never commit
 ai-secrets.ps1
+notebooklm-config.local.ps1
 *.env
 .env
 .env.*

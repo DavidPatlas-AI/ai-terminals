@@ -30,6 +30,12 @@ $script:AiModels = @(
         AuthHint = 'ChatGPT / Codex account'; Docs = 'https://chatgpt.com/codex'
         Tier = 'ChatGPT plan'; Notes = 'Tab to approve commands'
     }
+    @{
+        Id = 'notebooklm'; Name = 'NotebookLM'; NameHe = 'NotebookLM'; Provider = 'Google'; Color = '#a855f7'
+        Bat = 'NotebookLM.bat'; Launch = 'launch-notebooklm.ps1'; Auth = 'login'
+        AuthHint = 'notebooklm-login.bat (Google account)'; Docs = 'https://notebooklm.google.com'
+        Tier = 'Free with Google'; Notes = 'Chat with your uploaded sources | install-notebooklm.bat once'
+    }
 )
 
 $script:ExtraModels = @(

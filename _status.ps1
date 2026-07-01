@@ -164,6 +164,23 @@ function Test-GeminiStatus {
     }
 }
 
+function Test-NotebookLMStatus {
+    $helper = Join-Path $PSScriptRoot '_notebooklm.ps1'
+    if (-not (Test-Path -LiteralPath $helper)) {
+        return New-ModelStatus 'notebooklm' 'NotebookLM' 'Google' 'fail' 'no' '' '' 'Helper missing' 'login' 'Free with Google'
+    }
+    . $helper
+    if (-not (Test-NotebookLmInstalled)) {
+        return New-ModelStatus 'notebooklm' 'NotebookLM' 'Google' 'fail' 'no' '' '' 'Run install-notebooklm.bat' 'login' 'Free with Google'
+    }
+    $auth = Test-NotebookLmAuth
+    if (-not $auth.ok) {
+        $st = if ($auth.detail -match 'expired') { 'wait' } else { 'key' }
+        return New-ModelStatus 'notebooklm' 'NotebookLM' 'Google' $st 'yes' '' '' $auth.detail 'login' 'Free with Google'
+    }
+    return New-ModelStatus 'notebooklm' 'NotebookLM' 'Google' 'ok' 'yes' 'Google auth' '' 'Ready - NotebookLM.bat' 'login' 'Free with Google'
+}
+
 function Write-DashboardHtml {
     param([string]$ChatRoot, [object]$Payload)
     $template = Join-Path $ChatRoot 'dashboard-template.html'
