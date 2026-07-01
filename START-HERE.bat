@@ -16,6 +16,7 @@ echo     • AI-Terminals     (אותה תיקייה — שם אנגלי)
 echo     • AI Hub.lnk       (קיצור על שולחן העבודה)
 echo.
 echo   --------------------------------------------------------
+echo   A  הכל ביחד — סידור מלא (מומלץ!)
 echo   1  סדר שולחן עבודה (2 קיצורים בלבד)
 echo   2  פתח תפריט מודלים (AI Hub)
 echo   3  פתח דשבורד (טוקנים ושיחות)
@@ -33,6 +34,7 @@ echo   0  יציאה
 echo.
 set /p c="  בחר: "
 
+if /i "%c%"=="A" goto all
 if "%c%"=="1" goto desktop
 if "%c%"=="2" goto hub
 if "%c%"=="3" goto dash
@@ -46,6 +48,10 @@ if /i "%c%"=="S" goto security
 if /i "%c%"=="M" goto map
 if /i "%c%"=="H" goto help
 if "%c%"=="0" exit /b 0
+goto menu
+
+:all
+call setup-all.bat
 goto menu
 
 :desktop

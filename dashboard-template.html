@@ -116,6 +116,26 @@
     padding: 1rem; border-top: 1px solid var(--border);
   }
   .hint a { color: #a5b4fc; text-decoration: none; }
+
+  .folders {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: .65rem; margin-bottom: 1.75rem;
+  }
+  .fcard {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: .85rem 1rem; text-decoration: none; color: inherit;
+    display: block; transition: border-color .15s;
+  }
+  .fcard:hover { border-color: var(--accent); }
+  .fcard .fn { font-size: .85rem; font-weight: 600; margin-bottom: .25rem; }
+  .fcard .fp {
+    font-family: ui-monospace, Consolas, monospace; font-size: .68rem;
+    color: var(--muted); direction: ltr; text-align: left;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .fcard .fk { font-size: .65rem; color: #a5b4fc; margin-top: .35rem; }
+  .fcard.work { border-right: 3px solid var(--ok); }
+  .fcard.data { border-right: 3px solid #a78bfa; }
 </style>
 </head>
 <body>
@@ -132,6 +152,9 @@
 
   <div class="section-title">מודלים</div>
   <div class="models" id="models"></div>
+
+  <div class="section-title">תיקיות עבודה — לחץ לפתיחה</div>
+  <div class="folders" id="folders"></div>
 
   <div class="section-title">שיחות</div>
   <div class="table-wrap">
@@ -159,7 +182,9 @@ const STATUS_HE = {
   warning:'אזהרה', critical:'מלא', error:'שגיאה'
 };
 const MODEL_HE = { ok:'עובד', wait:'מכסה', fail:'לא', key:'מפתח' };
-const COLORS = { grok:'#8b5cf6', claude:'#34d399', gemini:'#60a5fa', deepseek:'#22d3ee', codex:'#fbbf24' };
+const COLORS = { grok:'#8b5cf6', claude:'#34d399', gemini:'#60a5fa', deepseek:'#22d3ee', codex:'#fbbf24', notebooklm:'#c084fc' };
+const FOLDER_HE = { work:'עבודה', data:'נתונים' };
+function fileUrl(p) { return 'file:///' + (p||'').replace(/\\/g, '/'); }
 const PROVIDER_COLORS = { Grok:'#a78bfa', Claude:'#34d399', Cursor:'#fb923c' };
 
 function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
@@ -188,6 +213,22 @@ document.getElementById('models').innerHTML = (DATA.models||[]).map(m => {
     <span class="meta">${MODEL_HE[m.status]||m.status}${esc(extra)}</span>
   </div>`;
 }).join('');
+
+const folders = DATA.workFolders || [];
+const foldersEl = document.getElementById('folders');
+if (!folders.length) {
+  foldersEl.innerHTML = '<div class="empty" style="grid-column:1/-1">הרץ check-all.bat או setup-work-shortcuts.bat</div>';
+} else {
+  foldersEl.innerHTML = folders.map(f => {
+    const cls = f.kind === 'data' ? 'data' : 'work';
+    const sk = f.shortcut ? `קיצור: ${f.shortcut}` : '';
+    return `<a class="fcard ${cls}" href="${fileUrl(f.path)}" title="${esc(f.tip||f.path)}">
+      <div class="fn">${esc(f.name)} <span style="color:var(--muted);font-weight:400">· ${FOLDER_HE[f.kind]||f.kind}</span></div>
+      <div class="fp">${esc(f.path)}</div>
+      ${sk ? `<div class="fk">${esc(sk)}</div>` : ''}
+    </a>`;
+  }).join('');
+}
 
 const rows = DATA.conversations || [];
 const body = document.getElementById('convBody');

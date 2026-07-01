@@ -80,6 +80,10 @@
     Documents\Codex\2026-MM-DD\...\outputs
 
   לשנות תיקיית עבודה ברירת מחדל: work-folders-config.ps1
+
+  setup-all.bat           הכל ביחד: שולחן עבודה + קיצורים + דשבורד
+  AI Dashboard            מציג תיקיות — לחץ לפתיחה
+  AI Hub -> P             תפריט פתיחת תיקיות
   publish-github.bat      פרסום ציבורי ל-GitHub
 
 

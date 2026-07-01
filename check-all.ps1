@@ -5,6 +5,7 @@ $ChatRoot = $PSScriptRoot
 . (Join-Path $ChatRoot '_status.ps1')
 . (Join-Path $ChatRoot '_free-options.ps1')
 . (Join-Path $ChatRoot '_conversations.ps1')
+. (Join-Path $ChatRoot '_work-folders.ps1')
 Import-AiSecrets
 
 Write-Host ''
@@ -24,6 +25,12 @@ $checked = Get-Date -Format 'yyyy-MM-dd HH:mm'
 $detect = Get-FreeOptionDetect
 $working = Get-WorkingCount $models
 $convData = Get-ConversationDashboard
+$workFolders = @(Get-AiWorkFolderCatalog | ForEach-Object {
+    @{
+        id = $_.Id; name = $_.Name; path = $_.Path
+        kind = $_.Kind; tool = $_.Tool; shortcut = $_.Shortcut; tip = $_.Tip
+    }
+})
 $payload = @{
     checkedAt = $checked
     folder = $ChatRoot
@@ -36,6 +43,7 @@ $payload = @{
     totalCount = $models.Count
     conversations = $convData.conversations
     tokenSummary = $convData.summary
+    workFolders = $workFolders
 }
 
 Write-Host '=== AI Terminal Status ===' -ForegroundColor Cyan

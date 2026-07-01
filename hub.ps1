@@ -67,7 +67,8 @@ function Show-Menu {
     Write-Host '  I  install-free.bat' -ForegroundColor DarkGray
     Write-Host ''
     Write-Host '  8  בדיקת חיבור מלאה' -ForegroundColor DarkCyan
-    Write-Host '  W  תיקיות עבודה — Codex, Grok, פרויקטים' -ForegroundColor Cyan
+    Write-Host '  W  קיצורי דרך לתיקיות (שולחן עבודה)' -ForegroundColor Cyan
+    Write-Host '  P  פתח תיקייה — Codex, Grok...' -ForegroundColor Cyan
     Write-Host '  E  תיקון עברית הפוכה ב-Cursor' -ForegroundColor Yellow
     Write-Host '  9  הוראות + MAP (מה זה מה)' -ForegroundColor DarkGray
     Write-Host '  0  יציאה' -ForegroundColor DarkGray
@@ -95,6 +96,8 @@ while ($true) {
         'c' { & (Join-Path $ChatRoot 'launch-crush.ps1'); break }
         'O' { & (Join-Path $ChatRoot 'launch-ollama.ps1'); break }
         'o' { & (Join-Path $ChatRoot 'launch-ollama.ps1'); break }
+        'P' { & (Join-Path $ChatRoot 'open-work-folders.ps1'); break }
+        'p' { & (Join-Path $ChatRoot 'open-work-folders.ps1'); break }
         'I' { Start-Process -FilePath (Join-Path $ChatRoot 'install-free.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         'i' { Start-Process -FilePath (Join-Path $ChatRoot 'install-free.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         '8' { & (Join-Path $ChatRoot 'check-all.ps1'); Read-Host '  Enter'; break }
