@@ -8,6 +8,9 @@ echo   ========================================
 echo      AI Terminals - Setup Complete
 echo   ========================================
 echo.
+echo   Step 0: Fix folder structure (if needed)
+if exist "%~dp0AI-Terminals\hub.ps1" call fix-folder-structure.bat
+echo.
 echo   Step 1/4: Desktop shortcuts (Hub + Dashboard)
 call setup-desktop.bat
 echo.

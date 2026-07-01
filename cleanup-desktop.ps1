@@ -3,13 +3,9 @@ $ErrorActionPreference = 'Continue'
 $Desktop = [Environment]::GetFolderPath('Desktop')
 
 # Canonical folder = Hebrew desktop dir with .git (never the junction itself)
-$Folder = Get-ChildItem $Desktop -Directory -EA SilentlyContinue | Where-Object {
-    $_.Name -ne 'AI-Terminals' -and
-    (Test-Path (Join-Path $_.FullName 'hub.ps1')) -and
-    (Test-Path (Join-Path $_.FullName '.git'))
-} | Select-Object -First 1 -ExpandProperty FullName
-
-if (-not $Folder) {
+. (Join-Path $PSScriptRoot '_paths.ps1')
+$Folder = Get-AiTerminalsRoot
+if (-not $Folder -or -not (Test-Path (Join-Path $Folder 'hub.ps1'))) {
     $Folder = (Resolve-Path $PSScriptRoot).Path
 }
 $Projects = Join-Path $Desktop ([char]0x05E4 + [char]0x05E8 + [char]0x05D5 + [char]0x05D9 + [char]0x05E7 + [char]0x05D8 + [char]0x05D9 + [char]0x05DD)
