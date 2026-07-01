@@ -1,8 +1,7 @@
-# Desktop cleanup — keeps only AI Hub + AI Dashboard shortcuts for AI tools
+# Desktop cleanup — project lives in folder only, no AI clutter on desktop
 $ErrorActionPreference = 'Continue'
 $Desktop = [Environment]::GetFolderPath('Desktop')
 
-# Canonical folder = Hebrew desktop dir with .git (never the junction itself)
 . (Join-Path $PSScriptRoot '_paths.ps1')
 $Folder = Get-AiTerminalsRoot
 if (-not $Folder -or -not (Test-Path (Join-Path $Folder 'hub.ps1'))) {
@@ -16,10 +15,10 @@ function Ensure-Dir([string]$p) {
 }
 
 Write-Host ''
-Write-Host '  Desktop cleanup' -ForegroundColor Cyan
+Write-Host '  Desktop cleanup (folder-only mode)' -ForegroundColor Cyan
 Write-Host ''
 
-# 1. Junction AI-Terminals -> this folder
+# 1. Junction AI-Terminals -> project folder (ASCII access, not clutter)
 $link = Join-Path $Desktop 'AI-Terminals'
 if (Test-Path -LiteralPath $link) {
     $item = Get-Item -LiteralPath $link -Force
@@ -31,24 +30,21 @@ if (Test-Path -LiteralPath $link) {
 }
 if (-not (Test-Path -LiteralPath $link)) {
     cmd /c "mklink /J `"$link`" `"$Folder`"" 2>$null | Out-Null
-    Write-Host 'Junction: AI-Terminals' -ForegroundColor Green
+    Write-Host 'Junction: AI-Terminals (opens project folder)' -ForegroundColor Green
 }
 
-# 2. Remove stray AI shortcuts / bats from desktop root
-$keep = @('AI Hub.lnk', 'AI Dashboard.lnk', 'YouTube.lnk', 'AI Projects.lnk')
+# 2. Remove ALL AI shortcuts from desktop — everything is in the folder
+$desktopKeep = @('YouTube.lnk')
 Get-ChildItem -LiteralPath $Desktop -File -EA SilentlyContinue | ForEach-Object {
     $n = $_.Name
-    if ($keep -contains $n) { return }
-    if ($n -like 'AI Work - *' -or $n -like 'AI Data - *') { return }
+    if ($desktopKeep -contains $n) { return }
     $remove = $false
-    if ($n -like 'AI - *' -or ($n -like 'AI-*' -and $n -notlike 'AI Work*' -and $n -notlike 'AI Data*') -or $n -match '^AI\.lnk$') { $remove = $true }
-    if ($n -like '*.bat' -and $n -notlike 'YouTube*') {
-        if ($n -match 'open|hub|dashboard|start|check|setup|try|install|refresh|publish') { }
-        elseif ($_.Extension -eq '.bat') { $remove = $true }
-    }
+    if ($n -like 'AI*.lnk' -or $n -like 'AI *.lnk') { $remove = $true }
+    if ($n -like 'AI - *' -or $n -like 'AI-*') { $remove = $true }
+    if ($n -like '*.bat' -and $n -notlike 'YouTube*') { $remove = $true }
     if ($remove) {
         Remove-Item -LiteralPath $_.FullName -Force -EA SilentlyContinue
-        Write-Host "Removed: $n" -ForegroundColor DarkYellow
+        Write-Host "Removed from desktop: $n" -ForegroundColor DarkYellow
     }
 }
 
@@ -67,36 +63,19 @@ Get-ChildItem -LiteralPath $env:USERPROFILE -File -EA SilentlyContinue | Where-O
     }
 }
 
-# 4. Remove .lnk clutter inside project folder
+# 4. Remove stray .lnk from project root (shortcuts live in shortcuts\)
 Get-ChildItem -LiteralPath $Folder -Filter '*.lnk' -File -EA SilentlyContinue | ForEach-Object {
     Remove-Item -LiteralPath $_.FullName -Force
+    Write-Host "Moved out of root: $($_.Name)" -ForegroundColor DarkGray
 }
 
-# 5. Work folder shortcuts (Codex outputs, sessions, projects...)
+# 5. Shortcuts inside project folder
 $wfScript = Join-Path $Folder 'setup-work-shortcuts.ps1'
 if (Test-Path -LiteralPath $wfScript) {
-    & $wfScript 2>$null | Out-Null
+    & $wfScript
 }
 
-# 6. Create hub + dashboard shortcuts
-$Wsh = New-Object -ComObject WScript.Shell
-$Cmd = $env:ComSpec
-$linkRoot = if (Test-Path -LiteralPath $link) { $link } else { $Folder }
-foreach ($s in @(
-    @{ Bat = 'start.bat'; Lnk = 'AI Hub.lnk' }
-    @{ Bat = 'open-dashboard.bat'; Lnk = 'AI Dashboard.lnk' }
-)) {
-    $bat = Join-Path $linkRoot $s.Bat
-    $lnk = Join-Path $Desktop $s.Lnk
-    $sc = $Wsh.CreateShortcut($lnk)
-    $sc.TargetPath = $Cmd
-    $sc.Arguments = "/c `"$bat`""
-    $sc.WorkingDirectory = $linkRoot
-    $sc.Save()
-    Write-Host "Shortcut: $($s.Lnk)" -ForegroundColor Green
-}
-
-# 7. Mark old duplicate folders (do not delete — user may have local keys)
+# 6. Mark old duplicate folders
 $oldFolders = @(
     (Join-Path $Desktop 'כלים\AI-Chats')
     (Join-Path $Desktop 'כלים\צאטים')
@@ -104,26 +83,21 @@ $oldFolders = @(
 $redirect = @(
     'MOVED — use the new folder instead'
     ''
-    'Old copy. Do not use.'
-    ''
     'Active project:'
-    '  Desktop\AI-Terminals'
-    '  (= Desktop\מודלים טרמנילים — same folder)'
+    '  Desktop\מודלים טרמנילים'
+    '  or Desktop\AI-Terminals (same folder)'
     ''
-    'Run: setup-desktop.bat or START-HERE.bat'
+    'Open shortcuts\ inside the folder'
 ) -join "`r`n"
 foreach ($old in $oldFolders) {
     if (-not (Test-Path -LiteralPath $old)) { continue }
     $note = Join-Path $old 'MOVED-READ-ME.txt'
     [System.IO.File]::WriteAllText($note, $redirect, [System.Text.UTF8Encoding]::new($false))
-    Write-Host "Marked old folder: $old" -ForegroundColor DarkYellow
 }
 
 Write-Host ''
-Write-Host 'Done: desktop has AI Hub + AI Dashboard only' -ForegroundColor Green
-Write-Host ''
-Write-Host 'Same project, 3 names:' -ForegroundColor Cyan
-Write-Host '  AI Hub.lnk  ->  start.bat  ->  hub.ps1' -ForegroundColor DarkGray
-Write-Host '  AI-Terminals  =  junction to  מודלים טרמנילים' -ForegroundColor DarkGray
-Write-Host '  Read MAP.txt for full diagram' -ForegroundColor DarkGray
+Write-Host 'Done: desktop clean' -ForegroundColor Green
+Write-Host "  Project: $Folder" -ForegroundColor Cyan
+Write-Host '  Open: Desktop\AI-Terminals  or  מודלים טרמנילים' -ForegroundColor DarkGray
+Write-Host '  Inside: shortcuts\  +  START-HERE.bat' -ForegroundColor DarkGray
 Write-Host ''

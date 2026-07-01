@@ -72,7 +72,7 @@ function Show-ChatBanner([string]$Name, [string]$Color = 'Cyan', [string]$Tip = 
     if ($ToolId -eq 'codex') {
         $out = Join-Path $env:USERPROFILE 'Documents\Codex'
         Write-Host "  codex saves builds: $out" -ForegroundColor DarkYellow
-        Write-Host "  shortcut: AI Work - Codex.lnk on desktop" -ForegroundColor DarkGray
+        Write-Host "  shortcut: shortcuts\AI Work - Codex.lnk" -ForegroundColor DarkGray
     }
     if ($Tip) { Write-Host "  tip: $Tip" -ForegroundColor DarkYellow }
     Write-Host ''

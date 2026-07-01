@@ -158,6 +158,7 @@ function New-FolderShortcut {
     param([string]$Desktop, [string]$LnkName, [string]$TargetDir, [string]$Description = '')
     if (-not $TargetDir -or -not (Test-Path -LiteralPath $TargetDir)) { return $false }
     $resolved = (Get-Item -LiteralPath $TargetDir).FullName
+    $Desktop = (Get-Item -LiteralPath $Desktop).FullName
     $Wsh = New-Object -ComObject WScript.Shell
     $lnk = Join-Path $Desktop $LnkName
     $sc = $Wsh.CreateShortcut($lnk)

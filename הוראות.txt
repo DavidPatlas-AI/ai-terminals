@@ -11,13 +11,14 @@ AI Terminals — מדריך מלא
   קרא MAP.txt לתרשים מלא.
 
 
-■ שולחן עבודה — רק 2 קיצורים
------------------------------
+■ הכל בתיקייה — שולחן עבודה נקי
+--------------------------------
 
-  AI Hub.lnk         תפריט מודלים
-  AI Dashboard.lnk   דשבורד טוקנים ושיחות
+  Desktop\מודלים טרמנילים   כל הפרויקט כאן
+  shortcuts\                קיצורים בתוך התיקייה (לא על שולחן העבודה)
+  START-HERE.bat            נקודת כניסה
 
-  לסידור: setup-desktop.bat  או  START-HERE.bat → 1
+  לסידור: setup-desktop.bat  או  setup-all.bat
 
 
 ■ שימוש יומיומי
@@ -39,12 +40,10 @@ AI Terminals — מדריך מלא
     Fix-Hebrew-RTL.lnk            קיצור על שולחן העבודה
     check-rtl-status.ps1          בדיקה שהתיקון פעיל
 
-  איפה הקבצים של כל כלי? (קיצורי דרך לשולחן עבודה)
-    setup-work-shortcuts.bat   יוצר קיצורים
-    open-work-folders.bat      פותח תיקייה ב-Explorer
-
-    Codex בונה קבצים ב:  Documents\Codex  (לא בתיקיית Hub!)
-    קיצור: AI Work - Codex.lnk
+  איפה הקבצים של כל כלי?
+    shortcuts\AI Work - Codex.lnk   Documents\Codex
+    open-work-folders.bat           תפריט פתיחה
+    setup-work-shortcuts.bat        יוצר מחדש את shortcuts\
 
     לשנות תיקיית עבודה: work-folders-config.ps1
 

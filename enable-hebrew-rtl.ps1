@@ -62,10 +62,78 @@ if ((Test-Path -LiteralPath $WbJs) -and (Test-Path -LiteralPath $JsPatch)) {
         $inject = Get-Content -LiteralPath $JsPatch -Raw -Encoding UTF8
         $block = "`n/* ===== $UniMarker ===== */`n$inject`n/* ===== END-UNIVERSAL-RTL-JS ===== */`n"
         [System.IO.File]::WriteAllText($WbJs, $wb + $block, [System.Text.UTF8Encoding]::new($false))
-        Write-Host '[OK] Patched workbench JS' -ForegroundColor Green
+        Write-Host '[OK] Patched workbench JS (universal)' -ForegroundColor Green
+        $wb = [System.IO.File]::ReadAllText($WbJs)
     } else {
-        Write-Host '[OK] workbench already patched' -ForegroundColor Green
+        Write-Host '[OK] workbench universal patch present' -ForegroundColor Green
     }
+
+    $FullMarker = 'START-CURSOR-RTL-FULL'
+    $RtlJs = Join-Path $ExtRtl 'resources\rtl.js'
+    if ((Test-Path -LiteralPath $RtlJs) -and ($wb -notmatch $FullMarker)) {
+        $rtlContent = Get-Content -LiteralPath $RtlJs -Raw -Encoding UTF8
+        $fullBlock = "`n/* ===== $FullMarker ===== */`n$rtlContent`n/* ===== END-CURSOR-RTL-FULL ===== */`n"
+        [System.IO.File]::WriteAllText($WbJs, $wb + $fullBlock, [System.Text.UTF8Encoding]::new($false))
+        Write-Host '[OK] Injected full rtl.js into workbench (agent chat fix)' -ForegroundColor Green
+    } elseif ($wb -match $FullMarker) {
+        Write-Host '[OK] full rtl.js already in workbench' -ForegroundColor Green
+    }
+}
+
+$WbCss = Join-Path $CursorOut 'vs\workbench\workbench.desktop.main.css'
+$CssMarker = 'START-CURSOR-RTL-CSS'
+if (Test-Path -LiteralPath $WbCss) {
+    $css = [System.IO.File]::ReadAllText($WbCss)
+    if ($css -notmatch $CssMarker) {
+        $cssBlock = @"
+
+/* ===== $CssMarker ===== */
+[data-component=agent-panel] .markdown-root,
+[data-component=agent-panel] .markdown-root p,
+[data-component=agent-panel] .markdown-root li,
+[data-component=agent-panel] .markdown-root > div,
+[data-component=agent-panel] .markdown-section,
+.agent-panel .markdown-root,
+.agent-panel .markdown-root p,
+.agent-panel .markdown-section,
+.markdown-root,
+.markdown-root p,
+.markdown-root li,
+.markdown-root > div,
+.markdown-section,
+.aislash-editor-input,
+.aislash-editor-input p,
+.aislash-editor-input-readonly,
+.aislash-editor-input-readonly p,
+.composer-human-message,
+.composer-human-message-container,
+.ui-prompt-input-editor__input,
+.ui-prompt-input-editor__input > p {
+  unicode-bidi: plaintext !important;
+  text-align: start !important;
+}
+code, pre, .markdown-code-outer-container, .cursor-code-block-content,
+.monaco-editor, .ui-code-block {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate !important;
+}
+/* ===== END-CURSOR-RTL-CSS ===== */
+"@
+        [System.IO.File]::WriteAllText($WbCss, $css + $cssBlock, [System.Text.UTF8Encoding]::new($false))
+        Write-Host '[OK] Patched workbench CSS for agent-panel' -ForegroundColor Green
+    } else {
+        Write-Host '[OK] workbench CSS already patched' -ForegroundColor Green
+    }
+}
+
+$V2Script = Join-Path $PSScriptRoot 'inject-rtl-streamdown-fix.ps1'
+if (Test-Path -LiteralPath $V2Script) {
+    Write-Host ''
+    Write-Host 'Applying V2 Streamdown/Glass fix...' -ForegroundColor Cyan
+    & $V2Script
+} else {
+    Write-Host '[WARN] inject-rtl-streamdown-fix.ps1 not found - skip V2' -ForegroundColor Yellow
 }
 
 Write-Host ''

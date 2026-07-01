@@ -67,7 +67,7 @@ function Show-Menu {
     Write-Host '  I  install-free.bat' -ForegroundColor DarkGray
     Write-Host ''
     Write-Host '  8  בדיקת חיבור מלאה' -ForegroundColor DarkCyan
-    Write-Host '  W  קיצורי דרך לתיקיות (שולחן עבודה)' -ForegroundColor Cyan
+    Write-Host '  W  עדכן shortcuts\ בתיקייה' -ForegroundColor Cyan
     Write-Host '  P  פתח תיקייה — Codex, Grok...' -ForegroundColor Cyan
     Write-Host '  E  תיקון עברית הפוכה ב-Cursor' -ForegroundColor Yellow
     Write-Host '  9  הוראות + MAP (מה זה מה)' -ForegroundColor DarkGray

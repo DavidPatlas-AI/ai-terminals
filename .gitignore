@@ -10,8 +10,10 @@ status.json
 dashboard.html
 STATUS.txt
 
-# Windows shortcuts
+# Windows shortcuts (generated in shortcuts\)
 *.lnk
+shortcuts/*.lnk
+!shortcuts/README.txt
 
 # OS
 Thumbs.db

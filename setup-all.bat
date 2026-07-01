@@ -5,27 +5,25 @@ cd /d "%~dp0"
 cls
 echo.
 echo   ========================================
-echo      AI Terminals - Setup Complete
+echo      AI Terminals - Setup (in folder)
 echo   ========================================
 echo.
-echo   Step 0: Fix folder structure (if needed)
-if exist "%~dp0AI-Terminals\hub.ps1" call fix-folder-structure.bat
+echo   Everything stays in this folder.
+echo   Desktop stays clean.
 echo.
-echo   Step 1/4: Desktop shortcuts (Hub + Dashboard)
+if exist "%~dp0AI-Terminals\hub.ps1" call fix-folder-structure.bat
+echo   Step 1/3: Clean desktop + shortcuts inside folder
 call setup-desktop.bat
 echo.
-echo   Step 2/4: Work folder shortcuts (Codex, Grok...)
-call setup-work-shortcuts.bat
-echo.
-echo   Step 3/4: Model status check + dashboard
+echo   Step 2/3: Model check + dashboard
 call check-all.bat
 echo.
-echo   Step 4/4: Opening dashboard...
+echo   Step 3/3: Open dashboard
 start "" "%~dp0open-dashboard.bat"
 echo.
-echo   Done! On your desktop:
-echo     AI Hub.lnk          - menu
-echo     AI Dashboard.lnk    - tokens + folders
-echo     AI Work - Codex.lnk - where Codex saves files
+echo   Done!
+echo     Folder:  Desktop\מודלים טרמנילים
+echo     Entry:   START-HERE.bat  or  shortcuts\
+echo     Codex:   shortcuts\AI Work - Codex.lnk
 echo.
 pause
