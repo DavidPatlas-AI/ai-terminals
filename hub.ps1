@@ -67,7 +67,7 @@ function Show-Menu {
     Write-Host '  I  install-free.bat' -ForegroundColor DarkGray
     Write-Host ''
     Write-Host '  8  בדיקת חיבור מלאה' -ForegroundColor DarkCyan
-    Write-Host '  9  הוראות' -ForegroundColor DarkGray
+    Write-Host '  9  הוראות + MAP (מה זה מה)' -ForegroundColor DarkGray
     Write-Host '  0  יציאה' -ForegroundColor DarkGray
     Write-Host ''
 }
@@ -96,7 +96,7 @@ while ($true) {
         'I' { Start-Process -FilePath (Join-Path $ChatRoot 'install-free.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         'i' { Start-Process -FilePath (Join-Path $ChatRoot 'install-free.bat') -WorkingDirectory $ChatRoot; Start-Sleep 1; break }
         '8' { & (Join-Path $ChatRoot 'check-all.ps1'); Read-Host '  Enter'; break }
-        '9' { notepad (Join-Path $ChatRoot 'הוראות.txt'); break }
+        '9' { notepad (Join-Path $ChatRoot 'MAP.txt'); notepad (Join-Path $ChatRoot 'הוראות.txt'); break }
         '0' { exit 0 }
         default { Write-Host '  ?' -ForegroundColor Yellow; Start-Sleep 1 }
     }

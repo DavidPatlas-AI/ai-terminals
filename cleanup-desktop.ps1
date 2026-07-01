@@ -1,7 +1,17 @@
 # Desktop cleanup — keeps only AI Hub + AI Dashboard shortcuts for AI tools
 $ErrorActionPreference = 'Continue'
-$Folder = (Resolve-Path $PSScriptRoot).Path
 $Desktop = [Environment]::GetFolderPath('Desktop')
+
+# Canonical folder = Hebrew desktop dir with .git (never the junction itself)
+$Folder = Get-ChildItem $Desktop -Directory -EA SilentlyContinue | Where-Object {
+    $_.Name -ne 'AI-Terminals' -and
+    (Test-Path (Join-Path $_.FullName 'hub.ps1')) -and
+    (Test-Path (Join-Path $_.FullName '.git'))
+} | Select-Object -First 1 -ExpandProperty FullName
+
+if (-not $Folder) {
+    $Folder = (Resolve-Path $PSScriptRoot).Path
+}
 $Projects = Join-Path $Desktop ([char]0x05E4 + [char]0x05E8 + [char]0x05D5 + [char]0x05D9 + [char]0x05E7 + [char]0x05D8 + [char]0x05D9 + [char]0x05DD)
 $ContentDir = Join-Path $Projects 'torah-content'
 
@@ -17,8 +27,10 @@ Write-Host ''
 $link = Join-Path $Desktop 'AI-Terminals'
 if (Test-Path -LiteralPath $link) {
     $item = Get-Item -LiteralPath $link -Force
-    if ($item.LinkType -ne 'Junction' -or $item.Target -notcontains $Folder) {
-        Remove-Item -LiteralPath $link -Force -Recurse -EA SilentlyContinue
+    $bad = ($item.LinkType -ne 'Junction') -or ($item.Target -notcontains $Folder) -or ($item.Target -contains $link)
+    if ($bad) {
+        if ($item.LinkType -eq 'Junction') { cmd /c "rmdir `"$link`"" 2>$null | Out-Null }
+        else { Remove-Item -LiteralPath $link -Force -Recurse -EA SilentlyContinue }
     }
 }
 if (-not (Test-Path -LiteralPath $link)) {
@@ -81,6 +93,34 @@ foreach ($s in @(
     Write-Host "Shortcut: $($s.Lnk)" -ForegroundColor Green
 }
 
+# 6. Mark old duplicate folders (do not delete — user may have local keys)
+$oldFolders = @(
+    (Join-Path $Desktop 'כלים\AI-Chats')
+    (Join-Path $Desktop 'כלים\צאטים')
+)
+$redirect = @(
+    'MOVED — use the new folder instead'
+    ''
+    'Old copy. Do not use.'
+    ''
+    'Active project:'
+    '  Desktop\AI-Terminals'
+    '  (= Desktop\מודלים טרמנילים — same folder)'
+    ''
+    'Run: setup-desktop.bat or START-HERE.bat'
+) -join "`r`n"
+foreach ($old in $oldFolders) {
+    if (-not (Test-Path -LiteralPath $old)) { continue }
+    $note = Join-Path $old 'MOVED-READ-ME.txt'
+    [System.IO.File]::WriteAllText($note, $redirect, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "Marked old folder: $old" -ForegroundColor DarkYellow
+}
+
 Write-Host ''
 Write-Host 'Done: desktop has AI Hub + AI Dashboard only' -ForegroundColor Green
+Write-Host ''
+Write-Host 'Same project, 3 names:' -ForegroundColor Cyan
+Write-Host '  AI Hub.lnk  ->  start.bat  ->  hub.ps1' -ForegroundColor DarkGray
+Write-Host '  AI-Terminals  =  junction to  מודלים טרמנילים' -ForegroundColor DarkGray
+Write-Host '  Read MAP.txt for full diagram' -ForegroundColor DarkGray
 Write-Host ''

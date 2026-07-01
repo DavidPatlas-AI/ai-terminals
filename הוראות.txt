@@ -1,50 +1,75 @@
-AI Terminals — מדריך קצר
+AI Terminals — מדריך מלא
 =========================
 
-שולחן עבודה (רק 2 קיצורים!)
+■ מה זה מה? (3 שמות, פרויקט אחד)
+---------------------------------
+
+  מודלים טרמנילים     התיקייה האמיתית על שולחן העבודה
+  AI-Terminals        אותה תיקייה בדיוק (junction — שם אנגלי)
+  AI Hub.lnk          קיצור שפותח start.bat → תפריט מודלים
+
+  קרא MAP.txt לתרשים מלא.
+
+
+■ שולחן עבודה — רק 2 קיצורים
+-----------------------------
+
+  AI Hub.lnk         תפריט מודלים
+  AI Dashboard.lnk   דשבורד טוקנים ושיחות
+
+  לסידור: setup-desktop.bat  או  START-HERE.bat → 1
+
+
+■ שימוש יומיומי
+---------------
+
+  START-HERE.bat     נקודת כניסה — הכל מכאן
+  start.bat          תפריט מודלים (Grok, Claude, Gemini...)
+  check-all.bat      רענון דשבורד + בדיקת מודלים
+  try-free.bat       אם שום מודל לא עובד (Gemini חינמי)
+
+  NotebookLM:
+    install-notebooklm.bat   פעם אחת
+    notebooklm-login.bat     התחברות Google
+    NotebookLM.bat           צ'אט עם המחברת שלך
+
+
+■ תיקיות ישנות — לא לגעת
+-------------------------
+
+  Desktop\כלים\AI-Chats
+  Desktop\כלים\צאטים
+
+  אלו גרסאות ישנות. הפרויקט הנוכחי:
+  Desktop\מודלים טרמנילים  (= AI-Terminals)
+
+
+■ פרסום ציבורי ל-GitHub
+-----------------------
+
+  כבר פורסם: github.com/DavidPatlas-AI/ai-terminals
+
+  לעדכון אחרי שינויים:
+
+    1. security-check.bat     חובה! בודק שאין מפתחות
+    2. publish-github.bat     commit + push
+
+  מה לעולם לא נכנס ל-GitHub:
+    • ai-secrets.ps1 (מפתחות API)
+    • status.json, dashboard.html (נתונים אישיים)
+    • קבצי .lnk
+
+  מפתחות: setup-keys.bat → נשמר רק מקומית
+
+
+■ מבנה קבצים (בתוך התיקייה)
 ---------------------------
 
-  AI Hub.lnk        תפריט — פתיחת מודלים
-  AI Dashboard.lnk  דשבורד — טוקנים ושיחות
+  start.bat / הפעל.bat       תפריט (אותו דבר)
+  Grok.bat, Claude.bat...   מודל בודד
+  AI-Grok.bat...             אותו דבר (שם ארוך)
+  check-all.bat              בדיקה מלאה
+  בדיקת צאטים.bat            = check-all.bat
 
-סידור מחדש
-----------
-
-  setup-desktop.bat    מנקה שולחן עבודה + יוצר 2 קיצורים
-
-דשבורד
-------
-
-  AI Dashboard.lnk  או  open-dashboard.bat
-
-  מראה:
-  • כמה טוקנים בשיחות פעילות
-  • סטטוס כל שיחה (פעיל / אזהרה / סגור)
-  • אחוז הקשר (context)
-  • סטטוס מודלים בשורה אחת
-
-  עדכון: check-all.bat
-
-NotebookLM (המחברת שלך בטרמינל)
---------------------------------
-
-  NotebookLM.bat           שאל שאלות על המקורות שלך
-  install-notebooklm.bat   התקנה + התחברות Google (פעם אחת)
-  notebooklm-login.bat     התחברות מחדש אם פג תוקף
-
-  מחברת: ca413bde-2973-4125-963e-7e2eaf0ddd95
-  אותה מחברת כמו בדפדפן — עם כל הקבצים שהעלית.
-
-התחלה
------
-
-  הפעל.bat       תפריט מלא
-  try-free.bat   אם שום דבר לא עובד (Gemini חינמי)
-  setup-keys.bat מפתחות API
-
-תיקייה: Desktop\AI-Terminals
-GitHub:  github.com/DavidPatlas-AI/ai-terminals
-
-סידור שולחן עבודה: setup-desktop.bat (מוחק בלאגן)
-בדיקת אבטחה: security-check.bat (לפני כל push!)
-פרסום לגיטהאב: publish-github.bat (רק אחרי security-check)
+  GitHub:  github.com/DavidPatlas-AI/ai-terminals
+  עזרה:    MAP.txt
