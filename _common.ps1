@@ -50,10 +50,30 @@ function Ensure-PathEntry([string]$Dir) {
     }
 }
 
-function Show-ChatBanner([string]$Name, [string]$Color = 'Cyan', [string]$Tip = '') {
+function Set-ToolWorkDirectory {
+    param([string]$ToolId)
+    $wf = Join-Path $ChatRoot '_work-folders.ps1'
+    if (Test-Path -LiteralPath $wf) {
+        . $wf
+        $dir = Get-ToolWorkDirectory $ToolId
+        if ($dir) {
+            $script:WorkDir = $dir
+            Set-Location -LiteralPath $dir
+            return
+        }
+    }
+    Set-WorkDirectory
+}
+
+function Show-ChatBanner([string]$Name, [string]$Color = 'Cyan', [string]$Tip = '', [string]$ToolId = '') {
     Write-Host ''
     Write-Host "  $Name" -ForegroundColor $Color
-    Write-Host "  folder: $ChatRoot" -ForegroundColor DarkGray
+    Write-Host "  work:   $WorkDir" -ForegroundColor DarkGray
+    if ($ToolId -eq 'codex') {
+        $out = Join-Path $env:USERPROFILE 'Documents\Codex'
+        Write-Host "  codex saves builds: $out" -ForegroundColor DarkYellow
+        Write-Host "  shortcut: AI Work - Codex.lnk on desktop" -ForegroundColor DarkGray
+    }
     if ($Tip) { Write-Host "  tip: $Tip" -ForegroundColor DarkYellow }
     Write-Host ''
 }

@@ -5,42 +5,39 @@ color 0B
 cls
 echo.
 echo  ========================================================
-echo     Fix reversed Hebrew in Cursor / Grok chat
+echo     Hebrew RTL in Cursor / Grok chat
 echo  ========================================================
 echo.
-echo  This is a Cursor display bug - not your text.
-echo  Permanent fix needs Administrator (once).
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0check-rtl-status.ps1"
 echo.
-echo  [1] Permanent fix (recommended) - opens UAC, click Yes
-echo  [2] Temporary fix (until Cursor closes)
+echo  [1] Install permanent fix (Administrator / UAC Yes)
+echo  [2] Temporary fix (paste in DevTools Console)
+echo  [3] Restart Cursor (after patch is installed)
+echo  [0] Back
 echo.
-choice /C 12 /N /M "  Choose [1] permanent  [2] temporary: "
+choice /C 1230 /N /M "  Choose: "
+if errorlevel 4 exit /b 0
+if errorlevel 3 goto RESTART
 if errorlevel 2 goto TEMP
 if errorlevel 1 goto PERM
 
 :PERM
 echo.
-echo  Running permanent fix...
 start "" "%~dp0fix-hebrew-rtl.vbs"
-echo.
-echo  After you see DONE in the blue window:
-echo    - Close ALL Cursor windows
-echo    - Reopen Cursor
-echo.
+echo  After DONE: close ALL Cursor windows and reopen.
 pause
+exit /b 0
+
+:RESTART
+call "%~dp0restart-cursor-for-rtl.bat"
 exit /b 0
 
 :TEMP
 echo.
-echo  Temporary fix:
-echo    1. In Cursor: Ctrl+Shift+P
-echo    2. Type: Developer: Toggle Developer Tools
-echo    3. Console tab
-echo    4. Ctrl+V then Enter
+echo  1. Ctrl+Shift+P -^> Developer: Toggle Developer Tools
+echo  2. Console tab -^> Ctrl+V -^> Enter
 echo.
-powershell -NoProfile -Command "$p='%USERPROFILE%\.cursor\extensions\satan2049.cursor-rtl-1.0.2-universal\resources\rtl.js'; if(Test-Path -LiteralPath $p){Set-Clipboard -Value (Get-Content -LiteralPath $p -Raw -Encoding UTF8); 'OK'} else {Set-Clipboard -Value (Get-Content -LiteralPath '%USERPROFILE%\.cursor\cursor-rtl-fix.js' -Raw -Encoding UTF8); 'fallback'}"
-echo.
-echo  Code copied to clipboard - paste in Cursor Console.
-echo.
+powershell -NoProfile -Command "$p='%USERPROFILE%\.cursor\extensions\satan2049.cursor-rtl-1.0.2-universal\resources\rtl.js'; if(Test-Path -LiteralPath $p){Set-Clipboard -Value (Get-Content -LiteralPath $p -Raw -Encoding UTF8)} else {Set-Clipboard -Value (Get-Content -LiteralPath '%USERPROFILE%\.cursor\cursor-rtl-fix.js' -Raw -Encoding UTF8)}"
+echo  Code copied to clipboard.
 pause
 exit /b 0

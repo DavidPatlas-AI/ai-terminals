@@ -58,7 +58,28 @@
   setup-keys.bat          מפתחות API (מקומי, לא ב-git)
   NotebookLM.bat          המחברת שלך בטרמינל
   fix-hebrew-chat.bat     תיקון עברית הפוכה ב-Cursor
+  setup-work-shortcuts.bat  קיצורי דרך לתיקיות עבודה
   הוראות.txt              מדריך מלא
+
+================================================================================
+  איפה כל כלי שומר קבצים? (קיצורי דרך על שולחן העבודה)
+================================================================================
+
+  הרץ: setup-work-shortcuts.bat  (או AI Hub -> W)
+
+  AI Projects.lnk           Desktop\פרויקטים
+  AI Work - Codex.lnk       Documents\Codex  <-- כאן Codex בונה קבצים!
+  AI Work - Codex Latest.lnk  התיקייה האחרונה ש-Codex עבד עליה
+  AI Data - Codex.lnk       %USERPROFILE%\.codex
+  AI Data - Grok.lnk        .grok\sessions
+  AI Data - Claude.lnk      .claude\projects
+  AI Data - Cursor.lnk      .cursor\projects
+
+  Codex בפרט שומר ב:
+    Documents\Codex\2026-MM-DD\...\work
+    Documents\Codex\2026-MM-DD\...\outputs
+
+  לשנות תיקיית עבודה ברירת מחדל: work-folders-config.ps1
   publish-github.bat      פרסום ציבורי ל-GitHub
 
 

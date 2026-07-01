@@ -34,8 +34,19 @@ AI Terminals — מדריך מלא
     NotebookLM.bat           צ'אט עם המחברת שלך
 
   עברית הפוכה ב-Cursor:
-    fix-hebrew-chat.bat      תיקון (מנהל, פעם אחת)
-    תקן-עברית-בצאט.bat       אותו דבר
+    fix-hebrew-chat.bat           תפריט תיקון (מנהל / זמני / הפעלה מחדש)
+    restart-cursor-for-rtl.bat    הפעלה מחדש אחרי שהתיקון מותקן
+    Fix-Hebrew-RTL.lnk            קיצור על שולחן העבודה
+    check-rtl-status.ps1          בדיקה שהתיקון פעיל
+
+  איפה הקבצים של כל כלי? (קיצורי דרך לשולחן עבודה)
+    setup-work-shortcuts.bat   יוצר קיצורים
+    open-work-folders.bat      פותח תיקייה ב-Explorer
+
+    Codex בונה קבצים ב:  Documents\Codex  (לא בתיקיית Hub!)
+    קיצור: AI Work - Codex.lnk
+
+    לשנות תיקיית עבודה: work-folders-config.ps1
 
 
 ■ תיקיות ישנות — לא לגעת

@@ -1,7 +1,7 @@
 . (Join-Path $PSScriptRoot '_common.ps1')
 Apply-AllKeys
-Set-WorkDirectory
-Show-ChatBanner 'OpenAI Codex' 'Yellow' 'Tab to approve commands | sandbox on'
+Set-ToolWorkDirectory 'codex'
+Show-ChatBanner 'OpenAI Codex' 'Yellow' 'Tab to approve commands | sandbox on' -ToolId 'codex'
 
 $codexDir = Join-Path $env:LOCALAPPDATA 'OpenAI\Codex\bin'
 $codexExe = Get-ChildItem -Path $codexDir -Recurse -Filter 'codex.exe' -ErrorAction SilentlyContinue |

@@ -39,12 +39,13 @@ if (-not (Test-Path -LiteralPath $link)) {
 }
 
 # 2. Remove stray AI shortcuts / bats from desktop root
-$keep = @('AI Hub.lnk', 'AI Dashboard.lnk', 'YouTube.lnk')
+$keep = @('AI Hub.lnk', 'AI Dashboard.lnk', 'YouTube.lnk', 'AI Projects.lnk')
 Get-ChildItem -LiteralPath $Desktop -File -EA SilentlyContinue | ForEach-Object {
     $n = $_.Name
     if ($keep -contains $n) { return }
+    if ($n -like 'AI Work - *' -or $n -like 'AI Data - *') { return }
     $remove = $false
-    if ($n -like 'AI - *' -or $n -like 'AI-*' -or $n -match '^AI\.lnk$') { $remove = $true }
+    if ($n -like 'AI - *' -or ($n -like 'AI-*' -and $n -notlike 'AI Work*' -and $n -notlike 'AI Data*') -or $n -match '^AI\.lnk$') { $remove = $true }
     if ($n -like '*.bat' -and $n -notlike 'YouTube*') {
         if ($n -match 'open|hub|dashboard|start|check|setup|try|install|refresh|publish') { }
         elseif ($_.Extension -eq '.bat') { $remove = $true }
@@ -75,7 +76,13 @@ Get-ChildItem -LiteralPath $Folder -Filter '*.lnk' -File -EA SilentlyContinue | 
     Remove-Item -LiteralPath $_.FullName -Force
 }
 
-# 5. Create exactly 2 desktop shortcuts
+# 5. Work folder shortcuts (Codex outputs, sessions, projects...)
+$wfScript = Join-Path $Folder 'setup-work-shortcuts.ps1'
+if (Test-Path -LiteralPath $wfScript) {
+    & $wfScript 2>$null | Out-Null
+}
+
+# 6. Create hub + dashboard shortcuts
 $Wsh = New-Object -ComObject WScript.Shell
 $Cmd = $env:ComSpec
 $linkRoot = if (Test-Path -LiteralPath $link) { $link } else { $Folder }
@@ -93,7 +100,7 @@ foreach ($s in @(
     Write-Host "Shortcut: $($s.Lnk)" -ForegroundColor Green
 }
 
-# 6. Mark old duplicate folders (do not delete — user may have local keys)
+# 7. Mark old duplicate folders (do not delete — user may have local keys)
 $oldFolders = @(
     (Join-Path $Desktop 'כלים\AI-Chats')
     (Join-Path $Desktop 'כלים\צאטים')

@@ -1,6 +1,6 @@
 . (Join-Path $PSScriptRoot '_common.ps1')
 Apply-AllKeys
-Set-WorkDirectory
+Set-ToolWorkDirectory 'claude'
 Show-ChatBanner 'Claude Code' 'Green' 'Paste from clipboard | ! for shell commands'
 
 $hint = 'npm install -g @anthropic-ai/claude-code'

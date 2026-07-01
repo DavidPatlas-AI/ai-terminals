@@ -1,6 +1,6 @@
 . (Join-Path $PSScriptRoot '_common.ps1')
 Import-AiSecrets
-if (Test-Path -LiteralPath $WorkDir) { Set-Location $WorkDir } else { Set-Location $HomeDir }
+Set-ToolWorkDirectory 'deepseek'
 Show-ChatBanner 'DeepSeek via Claude Code' 'Blue'
 
 $key = $script:DEEPSEEK_API_KEY

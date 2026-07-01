@@ -3,7 +3,7 @@ Apply-AllKeys
 if ($script:GROQ_API_KEY) { $env:GROQ_API_KEY = $script:GROQ_API_KEY }
 if ($script:OPENROUTER_API_KEY) { $env:OPENROUTER_API_KEY = $script:OPENROUTER_API_KEY }
 if ($script:HF_TOKEN) { $env:HF_TOKEN = $script:HF_TOKEN }
-Set-WorkDirectory
+Set-ToolWorkDirectory 'crush'
 Show-ChatBanner 'Crush' 'Magenta' 'Ctrl+O switch model | works with Groq/Gemini free keys'
 
 if (-not $env:GEMINI_API_KEY -and -not $env:GROQ_API_KEY -and -not $env:OPENROUTER_API_KEY) {

@@ -1,7 +1,7 @@
 . (Join-Path $PSScriptRoot '_common.ps1')
 Apply-AllKeys
 Ensure-PathEntry (Join-Path $env:APPDATA 'npm')
-Set-WorkDirectory
+Set-ToolWorkDirectory 'gemini'
 Show-ChatBanner 'Gemini CLI' 'Blue' 'gemini -y = YOLO | -m gemini-2.5-flash'
 
 if (-not $env:GEMINI_API_KEY) {
