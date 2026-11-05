@@ -1,0 +1,53 @@
+name: The Box Lite Windows GUI startup
+on:
+  workflow_dispatch:
+  push:
+    branches: ['test/the-box-lite-*']
+    paths: ['.github/workflows/desktop-lite-gui.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  gui:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 42089298192
+          name: the-box-lite-x86_64-pc-windows-msvc-portable-unsigned
+          path: portable
+      - name: Verify native window startup and clean shutdown
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $app=(Resolve-Path 'portable/TheBoxLite.exe').Path
+          $p=Start-Process -FilePath $app -WindowStyle Hidden -PassThru -RedirectStandardOutput gui-stdout.txt -RedirectStandardError gui-stderr.txt
+          try {
+            $ready=$false
+            for($i=0;$i -lt 60;$i++) {
+              Start-Sleep -Seconds 1
+              $p.Refresh()
+              if($p.HasExited) {throw "Application exited before showing a window: $($p.ExitCode)"}
+              if($p.MainWindowHandle -ne 0 -and $p.MainWindowTitle -eq 'The Box Lite') {$ready=$true;break}
+            }
+            if(-not $ready){throw 'Native window did not appear within 60 seconds'}
+            Start-Sleep -Seconds 5
+            $p.Refresh()
+            if($p.HasExited){throw 'Native window exited unexpectedly'}
+            "PASS: native The Box Lite window opened and remained responsive. PID $($p.Id)" | Tee-Object -FilePath gui-result.txt
+            if(-not $p.CloseMainWindow()){throw 'Native window rejected normal close'}
+            if(-not $p.WaitForExit(15000)){throw 'Application did not close normally'}
+            if($p.ExitCode -ne 0){throw "Application shutdown exit: $($p.ExitCode)"}
+            'PASS: native window closed normally.' | Tee-Object -FilePath gui-result.txt -Append
+          } finally {
+            $p.Refresh()
+            if(-not $p.HasExited){Stop-Process -Id $p.Id -Force}
+          }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: the-box-lite-native-gui-check
+          path: gui-*.txt
+          retention-days: 14
+
