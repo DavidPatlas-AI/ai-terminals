@@ -1,0 +1,13 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Minimal capability for the main window and the Phase 3 debug-db window. Only Tauri's core defaults are granted (needed for the debug window to receive Phase 4 provider_event pushes via event.listen); no shell, no filesystem, no dialog, no HTTP plugin permissions are exposed to the frontend. All db_*, detect_claude_code, run_claude_code and the four Phase 2 commands are plain Rust functions, not plugin commands, so they need no extra permission entries here regardless of window — the frontend can only ever call those exact names.",
+  "windows": [
+    "main",
+    "db-debug",
+    "classic"
+  ],
+  "permissions": [
+    "core:default"
+  ]
+}

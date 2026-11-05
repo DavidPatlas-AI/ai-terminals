@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>The Box · פשוט לדבר</title><link rel="stylesheet" href="lite.css"><script src="lite.js" defer></script></head>
+<body>
+<svg class="symbols" aria-hidden="true"><symbol id="i-box" viewBox="0 0 24 24"><path d="m12 2 9 5v10l-9 5-9-5V7Zm0 10 9-5M12 12 3 7m9 5v10M7.5 4.5l9 5"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="m7 10 5-5 5 5M12 5v14"/></symbol><symbol id="i-chat" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-8 8H5l-3 2v-9a9 9 0 1 1 18-1Z"/></symbol><symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6h7l2 3h9v11H3Z"/></symbol><symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M8 4v6M16 14v6"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol><symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="9" r="5"/><path d="m12 13 8 8M16 17l3-3M18 19l3-3"/></symbol><symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol></svg>
+<a class="skip" href="#message">דלג לכתיבת הודעה</a>
+<div id="previewBanner" class="preview" hidden>תצוגה מקדימה · חיבור לכלים מקומיים פועל מתוך אפליקציית המחשב</div>
+<div class="shell">
+  <div id="scrim" class="scrim" hidden></div>
+  <aside id="sidebar" class="sidebar" aria-label="סביבת העבודה">
+    <div class="brand"><span class="box-mark" aria-hidden="true"><svg><use href="#i-box"/></svg></span><div><strong>The Box</strong><span>פחות התעסקות. יותר עשייה.</span></div><span class="lite-tag" lang="en">LITE</span></div>
+    <button id="newChat" class="new-chat"><svg><use href="#i-plus"/></svg>שיחה חדשה<span class="shortcut" aria-hidden="true">⌘ N</span></button>
+    <div class="section-label">סביבת עבודה</div>
+    <label class="sr-only" for="project">בחירת פרויקט</label>
+    <div class="project-control"><svg><use href="#i-folder"/></svg><select id="project" aria-label="בחירת פרויקט"><option>טוען…</option></select><button id="addProject" class="icon-button" title="הוסף תיקיית פרויקט" aria-label="הוסף תיקיית פרויקט"><svg><use href="#i-plus"/></svg></button></div>
+    <div class="section-heading"><span class="section-label">השיחות שלך</span><span id="chatCount" class="count"></span></div>
+    <nav id="conversations" class="conversations" aria-label="שיחות קודמות"><p class="small-muted">השיחות יופיעו כאן</p></nav>
+    <div class="sidebar-bottom"><span class="privacy-dot"></span><div><strong>נשמר במחשב שלך</strong><span>השיחות והבחירות מחכות לך כאן</span></div></div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-start"><button id="menu" class="icon-button mobile-only" aria-label="פתח את רשימת השיחות" aria-expanded="false" aria-controls="sidebar"><svg><use href="#i-menu"/></svg></button><label class="provider-control"><span id="providerDot" class="provider-dot"></span><select id="provider" aria-label="בחירת כלי"><option value="claude">Claude</option><option value="codex">Codex</option><option value="gemini">Gemini</option><option value="grok">Grok</option><option value="ollama">Ollama · במחשב</option><option value="deepseek">DeepSeek · API</option></select></label><span id="connection" class="connection">מזהה כלים…</span></div>
+      <div class="topbar-end"><button id="connect" class="quiet-button"><svg><use href="#i-key"/></svg>חיבור חשבון</button><button id="settings" class="icon-button" aria-label="הגדרות" title="הגדרות"><svg><use href="#i-settings"/></svg></button></div>
+    </header>
+    <div id="notice" class="notice" role="alert" hidden><span id="noticeText"></span><button id="dismissNotice" class="icon-button" aria-label="סגור הודעה"><svg><use href="#i-close"/></svg></button></div>
+    <section id="thread" class="thread" aria-label="תוכן השיחה" tabindex="0">
+      <div id="welcome" class="welcome">
+        <span class="welcome-mark" aria-hidden="true"><svg><use href="#i-box"/></svg></span><p class="eyebrow">כל הכלים שלך. מקום אחד.</p><h1>במה נתקדם היום?</h1><p class="intro">בוחרים כלי, כותבים, וממשיכים.<br>החשבון, הפרויקט והשיחה נשארים איתך.</p>
+        <div class="suggestions"><button data-prompt="עזור לי להפוך את הרעיון הבא לתוכנית פשוטה: "><span>01</span><strong>נעשה סדר ברעיון</strong><small>ממחשבה לצעד הבא</small></button><button data-prompt="עזור לי להבין את הבעיה הבאה, בצורה פשוטה: "><span>02</span><strong>נפתור משהו תקוע</strong><small>הסבר ברור, צעד אחר צעד</small></button><button data-prompt="סכם לי את הטקסט הבא בקצרה: "><span>03</span><strong>נקצר את הדרך</strong><small>סיכום, ניסוח או בדיקה</small></button></div>
+        <div class="tool-strip" aria-label="כלים שזוהו"><span class="small-muted">מזהה את הכלים במחשב…</span></div>
+      </div>
+      <button id="older" class="older quiet-button" hidden>הצג הודעות קודמות</button><div id="messages" class="messages"></div>
+    </section>
+    <footer class="compose-area"><div id="runStatus" class="run-status" aria-live="polite"></div><form id="composer" class="composer"><label class="sr-only" for="message">ההודעה שלך</label><textarea id="message" rows="1" maxlength="16000" placeholder="מה תרצה לעשות?" autocomplete="off"></textarea><div class="composer-bottom"><span id="composerHint">שיחה בלבד · ללא שינוי קבצים</span><div class="send-controls"><span id="keyHint" aria-hidden="true">Enter לשליחה</span><button id="send" class="send" type="submit" aria-label="שלח הודעה"><svg><use href="#i-arrow"/></svg></button><button id="stop" class="stop" type="button" hidden>עצור</button></div></div></form><div class="footnote"><span id="economyLabel">מצב חסכוני מופעל</span><span>התשובות עשויות להכיל טעויות. כדאי לבדוק פרטים חשובים.</span></div></footer>
+  </main>
+</div>
+<dialog id="settingsDialog" aria-labelledby="settingsTitle"><div class="dialog-heading"><div><p class="eyebrow">THE BOX · LITE</p><h2 id="settingsTitle">בדיוק כמו שנוח לך</h2></div><button id="closeSettings" class="icon-button" aria-label="סגור הגדרות"><svg><use href="#i-close"/></svg></button></div><label class="setting-row"><div><strong>מצב חסכוני</strong><p>מעביר פחות היסטוריה לכל בקשה ומבקש תשובות ממוקדות יותר. ההיסטוריה המלאה נשארת במחשב.</p></div><input id="economy" type="checkbox" checked role="switch"></label><label class="setting-row" for="theme"><div><strong>מראה</strong><p>ממשק נקי, בלי אנימציות מכבידות.</p></div><select id="theme"><option value="system">לפי המחשב</option><option value="light">בהיר</option><option value="dark">כהה</option></select></label><div class="settings-note"><strong>התחברות אחת, בשירות המקורי.</strong><p>כל כלי משתמש בחשבון שלו. האפליקציה אינה מעתיקה סיסמאות או מאחדת מנויים. מודל מקומי מופעל רק כשתבחר בו.</p></div><button id="classic" class="quiet-button">פתח את סביבת העבודה המתקדמת ←</button><p id="platformInfo" class="small-muted"></p></dialog>
+</body></html>

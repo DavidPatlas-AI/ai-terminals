@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>The Box — Debug DB</title>
+<style>
+  body{font-family:Segoe UI,Heebo,sans-serif;background:#171410;color:#ece6d9;margin:0;padding:20px;line-height:1.5}
+  h1{font-size:18px}
+  h2{font-size:14px;color:#a69c89;margin-top:28px}
+  section{background:#211c15;border:1px solid #382f22;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+  label{display:block;font-size:12px;color:#a69c89;margin:8px 0 3px}
+  input{width:100%;box-sizing:border-box;padding:6px 8px;border-radius:6px;border:1px solid #382f22;background:#171410;color:#ece6d9}
+  button{margin-top:10px;padding:6px 14px;border-radius:6px;border:1px solid #e8935a;background:#e8935a;color:#171410;font-weight:700;cursor:pointer}
+  button.secondary{background:transparent;color:#e8935a}
+  ul{list-style:none;padding:0;margin:10px 0 0;font-size:12.5px}
+  li{padding:6px 8px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+  li:hover{background:#2a2318}
+  li.selected{outline:1px solid #e8935a}
+  .muted{color:#a69c89}
+  .err{color:#f87171;font-size:12.5px;margin-top:6px}
+  code{font-family:"JetBrains Mono",monospace;font-size:11px;color:#a69c89}
+</style>
+</head>
+<body>
+  <h1>The Box — מסך Debug ל-DB (Phase 3)</h1>
+  <p class="muted">מסך פנימי לבדיקת שכבת ה-DB בלבד. לא חלק מהממשק הסופי.</p>
+
+  <section id="notTauri" hidden>
+    <p class="err">מסך זה עובד רק בתוך מעטפת Tauri (לא בדפדפן רגיל).</p>
+  </section>
+
+  <div id="app" hidden>
+    <section>
+      <h2>פרויקטים</h2>
+      <label>שם</label><input id="projName" placeholder="לדוגמה: The Box">
+      <label>נתיב</label><input id="projPath" placeholder="C:\Users\...">
+      <button id="createProject">צור פרויקט</button>
+      <div id="projErr" class="err"></div>
+      <ul id="projectList"></ul>
+    </section>
+
+    <section>
+      <h2>שיחות <span class="muted" id="convProjLabel"></span></h2>
+      <label>כותרת (אופציונלי)</label><input id="convTitle" placeholder="כותרת לשיחה">
+      <button id="createConversation" disabled>צור שיחה</button>
+      <div id="convErr" class="err"></div>
+      <ul id="conversationList"></ul>
+    </section>
+
+    <section>
+      <h2>Turns <span class="muted" id="turnConvLabel"></span></h2>
+      <label>user_intent (בעברית, כפי שהמשתמש היה מקליד)</label><input id="turnIntent" placeholder="תבנה לי X">
+      <button id="createTurn" disabled>צור Turn</button>
+      <div id="turnErr" class="err"></div>
+      <ul id="turnList"></ul>
+    </section>
+
+    <section>
+      <h2>Claude Code Adapter (Phase 4)</h2>
+      <button id="detectBtn" class="secondary">בדוק זמינות claude</button>
+      <div id="detectResult" class="muted" style="margin-top:6px"></div>
+    </section>
+
+    <section>
+      <h2>תכנון ואישור (Phase 5) <span class="muted" id="planTurnLabel">(לחצו על Turn ברשימה למעלה)</span></h2>
+      <button id="planBtn" disabled>צור תוכנית עבודה</button>
+      <div id="planErr" class="err"></div>
+      <div id="planBox" style="margin-top:10px" hidden>
+        <div><b>רמת סיכון:</b> <span id="planRisk"></span></div>
+        <ol id="planSteps" style="margin:8px 0 0;padding-inline-start:20px;font-size:12.5px"></ol>
+        <div style="margin-top:10px">
+          <button id="approveBtn">אשר תוכנית</button>
+          <button id="rejectBtn" class="secondary">דחה</button>
+        </div>
+      </div>
+
+      <label style="margin-top:14px">הרצה <span class="muted" id="runTurnLabel"></span></label>
+      <button id="runBtn" disabled>הרץ Claude Code (על התוכנית המאושרת / ישירות)</button>
+      <button id="runCodexBtn" disabled>הרץ Codex ישירות</button>
+      <button id="handoffBtn" disabled>העבר (Handoff) ל-Codex</button>
+      <button id="cancelBtn" class="secondary" disabled>בטל ריצה פעילה</button>
+      <div id="runErr" class="err"></div>
+      <div id="runLog" style="margin-top:10px;max-height:260px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px;white-space:pre-wrap"></div>
+    </section>
+
+    <section>
+      <h2>Codex Adapter (Phase 6)</h2>
+      <button id="detectCodexBtn" class="secondary">בדוק זמינות codex</button>
+      <div id="detectCodexResult" class="muted" style="margin-top:6px"></div>
+      <p class="muted" style="margin-top:8px;font-size:11.5px">
+        "הרץ Codex ישירות" מריץ Codex על ה-user_intent של ה-Turn שנבחר, בלי תלות בהיסטוריה.
+        "העבר ל-Codex" בונה תקציר handoff אמיתי מכל מה שכבר קרה ב-Turn (כולל ריצות קודמות עם Claude Code) ומריץ Codex עם התקציר הזה כפרומפט הראשוני.
+      </p>
+    </section>
+
+    <section>
+      <h2>Ollama Adapter (Phase 10)</h2>
+      <button id="detectOllamaBtn" class="secondary">בדוק זמינות ollama</button>
+      <div id="detectOllamaResult" class="muted" style="margin-top:6px"></div>
+      <button id="runOllamaBtn" disabled>הרץ Ollama (מקומי, ללא עלות)</button>
+      <p class="muted" style="margin-top:8px;font-size:11.5px">
+        מודל צ'אט מקומי בלבד — אין לו יכולת לערוך קבצים, אז אין checkpoint ואין file_changed. משתמש במודל llama3.2 כברירת מחדל.
+      </p>
+    </section>
+
+    <section>
+      <h2>Gemini Adapter (Phase 10) <span class="err">⚠️ לא מאומת</span></h2>
+      <button id="detectGeminiBtn" class="secondary">בדוק זמינות gemini</button>
+      <div id="detectGeminiResult" class="muted" style="margin-top:6px"></div>
+      <button id="runGeminiBtn" disabled>הרץ Gemini</button>
+      <p class="err" style="margin-top:8px;font-size:11.5px">
+        פרסור הפלט של Gemini לא אומת מול הרצה אמיתית (חסר GEMINI_API_KEY/Google Cloud auth בסביבה הזו) — בנוי לפי --help של ה-CLI וניחוש מבוסס על התבנית של Claude Code. כישלון פרסור יחזור כשגיאה אמיתית, לא הצלחה מזויפת, אבל התוצאה עצמה טעונה אימות.
+      </p>
+    </section>
+  </div>
+
+<script>
+(function () {
+  var isTauri = typeof window.__TAURI__ !== 'undefined';
+  if (!isTauri) {
+    document.getElementById('notTauri').hidden = false;
+    return;
+  }
+  document.getElementById('app').hidden = false;
+  var invoke = window.__TAURI__.core.invoke;
+
+  var selectedProjectId = null;
+  var selectedConversationId = null;
+  var selectedTurnId = null;
+  var selectedProjectPath = null;
+  var currentPlan = null; // { id, riskLevel, steps }
+  var activeRunId = null;
+
+  function li(text, onClick) {
+    var el = document.createElement('li');
+    el.textContent = text;
+    if (onClick) el.addEventListener('click', onClick);
+    return el;
+  }
+
+  function showErr(elId, e) {
+    document.getElementById(elId).textContent = String(e);
+  }
+  function clearErr(elId) {
+    document.getElementById(elId).textContent = '';
+  }
+
+  function refreshProjects() {
+    invoke('db_list_projects').then(function (projects) {
+      var ul = document.getElementById('projectList');
+      ul.innerHTML = '';
+      projects.forEach(function (p) {
+        var item = li(p.name + '  ', function () { selectProject(p); });
+        var code = document.createElement('code');
+        code.textContent = p.path;
+        item.appendChild(code);
+        if (p.id === selectedProjectId) item.className = 'selected';
+        ul.appendChild(item);
+      });
+    }).catch(function (e) { showErr('projErr', e); });
+  }
+
+  function selectProject(p) {
+    selectedProjectId = p.id;
+    selectedProjectPath = p.path;
+    selectedConversationId = null;
+    selectedTurnId = null;
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('runTurnLabel').textContent = '(לחצו על Turn ברשימה למעלה)';
+    document.getElementById('convProjLabel').textContent = '— ' + p.name;
+    document.getElementById('createConversation').disabled = false;
+    document.getElementById('createTurn').disabled = true;
+    document.getElementById('turnConvLabel').textContent = '';
+    document.getElementById('turnList').innerHTML = '';
+    refreshProjects();
+    refreshConversations();
+  }
+
+  function refreshConversations() {
+    var ul = document.getElementById('conversationList');
+    ul.innerHTML = '';
+    if (!selectedProjectId) return;
+    invoke('db_list_conversations', { projectId: selectedProjectId }).then(function (list) {
+      list.forEach(function (c) {
+        var item = li((c.title || '(ללא כותרת)') + '  ', function () { selectConversation(c); });
+        var code = document.createElement('code');
+        code.textContent = c.status;
+        item.appendChild(code);
+        if (c.id === selectedConversationId) item.className = 'selected';
+        ul.appendChild(item);
+      });
+    }).catch(function (e) { showErr('convErr', e); });
+  }
+
+  function selectConversation(c) {
+    selectedConversationId = c.id;
+    document.getElementById('turnConvLabel').textContent = '— ' + (c.title || c.id.slice(0, 8));
+    document.getElementById('createTurn').disabled = false;
+    refreshConversations();
+    refreshTurns();
+  }
+
+  function refreshTurns() {
+    var ul = document.getElementById('turnList');
+    ul.innerHTML = '';
+    if (!selectedConversationId) return;
+    invoke('db_list_turns', { conversationId: selectedConversationId }).then(function (list) {
+      list.forEach(function (t) {
+        var item = li('#' + t.seq + ' ' + t.user_intent + '  ', function () { selectTurn(t); });
+        var code = document.createElement('code');
+        code.textContent = t.status;
+        item.appendChild(code);
+        if (t.id === selectedTurnId) item.className = 'selected';
+        ul.appendChild(item);
+      });
+    }).catch(function (e) { showErr('turnErr', e); });
+  }
+
+  function selectTurn(t) {
+    selectedTurnId = t.id;
+    currentPlan = null;
+    document.getElementById('planBox').hidden = true;
+    document.getElementById('planTurnLabel').textContent = '— #' + t.seq + ' ' + t.user_intent;
+    document.getElementById('runTurnLabel').textContent = '— #' + t.seq + ' ' + t.user_intent;
+    document.getElementById('planBtn').disabled = !selectedProjectPath;
+    document.getElementById('runBtn').disabled = !selectedProjectPath;
+    document.getElementById('runCodexBtn').disabled = !selectedProjectPath;
+    document.getElementById('handoffBtn').disabled = !selectedProjectPath;
+    document.getElementById('runOllamaBtn').disabled = false; // no project needed — plain chat, no file access
+    document.getElementById('runGeminiBtn').disabled = !selectedProjectPath;
+    refreshTurns();
+  }
+
+  document.getElementById('createProject').addEventListener('click', function () {
+    clearErr('projErr');
+    var name = document.getElementById('projName').value.trim();
+    var path = document.getElementById('projPath').value.trim();
+    if (!name || !path) { showErr('projErr', 'שם ונתיב חובה'); return; }
+    invoke('db_create_project', { name: name, path: path, icon: null })
+      .then(function () {
+        document.getElementById('projName').value = '';
+        document.getElementById('projPath').value = '';
+        refreshProjects();
+      })
+      .catch(function (e) { showErr('projErr', e); });
+  });
+
+  document.getElementById('createConversation').addEventListener('click', function () {
+    clearErr('convErr');
+    if (!selectedProjectId) return;
+    var title = document.getElementById('convTitle').value.trim() || null;
+    invoke('db_create_conversation', { projectId: selectedProjectId, title: title })
+      .then(function () {
+        document.getElementById('convTitle').value = '';
+        refreshConversations();
+      })
+      .catch(function (e) { showErr('convErr', e); });
+  });
+
+  document.getElementById('createTurn').addEventListener('click', function () {
+    clearErr('turnErr');
+    if (!selectedConversationId) return;
+    var intent = document.getElementById('turnIntent').value.trim();
+    if (!intent) { showErr('turnErr', 'user_intent חובה'); return; }
+    invoke('db_create_turn', { conversationId: selectedConversationId, userIntent: intent })
+      .then(function () {
+        document.getElementById('turnIntent').value = '';
+        refreshTurns();
+      })
+      .catch(function (e) { showErr('turnErr', e); });
+  });
+
+  function currentTurnIntent() {
+    return invoke('db_list_turns', { conversationId: selectedConversationId }).then(function (turns) {
+      var t = turns.find(function (x) { return x.id === selectedTurnId; });
+      return t ? t.user_intent : '';
+    });
+  }
+
+  document.getElementById('planBtn').addEventListener('click', function () {
+    clearErr('planErr');
+    if (!selectedTurnId || !selectedProjectPath) return;
+    document.getElementById('planBtn').disabled = true;
+    currentTurnIntent().then(function (intent) {
+      return invoke('generate_task_plan', {
+        turnId: selectedTurnId,
+        projectPath: selectedProjectPath,
+        userIntent: intent,
+      });
+    }).then(function (plan) {
+      currentPlan = plan;
+      var steps = JSON.parse(plan.steps_json);
+      document.getElementById('planRisk').textContent = plan.risk_level;
+      var ol = document.getElementById('planSteps');
+      ol.innerHTML = '';
+      steps.forEach(function (s) {
+        var li2 = document.createElement('li');
+        li2.textContent = s;
+        ol.appendChild(li2);
+      });
+      document.getElementById('planBox').hidden = false;
+      refreshTurns();
+    }).catch(function (e) {
+      showErr('planErr', e);
+    }).finally(function () {
+      document.getElementById('planBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('approveBtn').addEventListener('click', function () {
+    clearErr('planErr');
+    if (!currentPlan) return;
+    invoke('decide_task_plan', { turnId: selectedTurnId, taskPlanId: currentPlan.id, decision: 'approved' })
+      .then(function () { appendLog('[approval] approved'); refreshTurns(); })
+      .catch(function (e) { showErr('planErr', e); });
+  });
+
+  document.getElementById('rejectBtn').addEventListener('click', function () {
+    clearErr('planErr');
+    if (!currentPlan) return;
+    invoke('decide_task_plan', { turnId: selectedTurnId, taskPlanId: currentPlan.id, decision: 'rejected' })
+      .then(function () { appendLog('[approval] rejected'); document.getElementById('planBox').hidden = true; refreshTurns(); })
+      .catch(function (e) { showErr('planErr', e); });
+  });
+
+  document.getElementById('cancelBtn').addEventListener('click', function () {
+    if (!activeRunId) return;
+    invoke('cancel_run', { runId: activeRunId })
+      .then(function () { appendLog('[cancel] requested'); })
+      .catch(function (e) { showErr('runErr', e); });
+  });
+
+  document.getElementById('detectBtn').addEventListener('click', function () {
+    var el = document.getElementById('detectResult');
+    el.textContent = 'בודק...';
+    invoke('detect_claude_code').then(function (r) {
+      el.textContent = r.installed
+        ? ('✓ מותקן — ' + r.version + (r.path ? ' (' + r.path + ')' : ''))
+        : '✗ לא נמצא claude ב-PATH';
+    }).catch(function (e) { el.textContent = String(e); });
+  });
+
+  function appendLog(line) {
+    var el = document.getElementById('runLog');
+    el.textContent += line + '\n';
+    el.scrollTop = el.scrollHeight;
+  }
+
+  if (window.__TAURI__.event) {
+    window.__TAURI__.event.listen('provider_event', function (evt) {
+      var p = evt.payload;
+      if (p.turnId !== selectedTurnId) return;
+      var e = p.event;
+      if (e.type === 'text_chunk') appendLog('[text] ' + e.text);
+      else if (e.type === 'action_requested') appendLog('[tool] ' + e.action);
+      else if (e.type === 'file_changed') appendLog('[file:' + e.change_type + '] ' + e.path);
+      else if (e.type === 'log') appendLog('[' + e.level + '] ' + e.message);
+      else if (e.type === 'error') appendLog('[error] ' + e.message);
+      else if (e.type === 'session_id') appendLog('[session] ' + e.provider_session_id);
+      else if (e.type === 'done') {
+        appendLog('[done] exit_status=' + e.exit_status);
+        activeRunId = null;
+        document.getElementById('cancelBtn').disabled = true;
+        refreshTurns();
+      }
+    });
+  }
+
+  document.getElementById('runBtn').addEventListener('click', function () {
+    clearErr('runErr');
+    if (!selectedTurnId || !selectedProjectPath) return;
+    document.getElementById('runLog').textContent = '';
+    document.getElementById('runBtn').disabled = true;
+    // low/medium risk -> acceptEdits (auto-accept file edits, Bash still
+    // gated); high risk -> default (nothing auto-approved). Every level
+    // additionally hard-blocks git push / rm -rf / git reset --hard
+    // regardless (see adapters::claude_code::ALWAYS_DISALLOWED_TOOLS).
+    var mode = currentPlan && currentPlan.risk_level === 'high' ? 'default' : 'acceptEdits';
+    currentTurnIntent().then(function (intent) {
+      return invoke('run_claude_code', {
+        turnId: selectedTurnId,
+        projectId: selectedProjectId,
+        projectPath: selectedProjectPath,
+        prompt: intent,
+        permissionMode: mode,
+      });
+    }).then(function (runId) {
+      activeRunId = runId;
+      document.getElementById('cancelBtn').disabled = false;
+      appendLog('[provider_run] ' + runId + ' (permission_mode=' + mode + ')');
+    }).catch(function (e) {
+      showErr('runErr', e);
+    }).finally(function () {
+      document.getElementById('runBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('detectCodexBtn').addEventListener('click', function () {
+    var el = document.getElementById('detectCodexResult');
+    el.textContent = 'בודק...';
+    invoke('detect_codex').then(function (r) {
+      el.textContent = r.installed
+        ? ('✓ מותקן — ' + r.version + (r.path ? ' (' + r.path + ')' : ''))
+        : '✗ לא נמצא codex ב-PATH';
+    }).catch(function (e) { el.textContent = String(e); });
+  });
+
+  document.getElementById('runCodexBtn').addEventListener('click', function () {
+    clearErr('runErr');
+    if (!selectedTurnId || !selectedProjectPath) return;
+    document.getElementById('runLog').textContent = '';
+    document.getElementById('runCodexBtn').disabled = true;
+    currentTurnIntent().then(function (intent) {
+      return invoke('run_codex', {
+        turnId: selectedTurnId,
+        projectId: selectedProjectId,
+        projectPath: selectedProjectPath,
+        prompt: intent,
+      });
+    }).then(function (runId) {
+      activeRunId = runId;
+      document.getElementById('cancelBtn').disabled = false;
+      appendLog('[provider_run] ' + runId + ' (codex, direct)');
+    }).catch(function (e) {
+      showErr('runErr', e);
+    }).finally(function () {
+      document.getElementById('runCodexBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('handoffBtn').addEventListener('click', function () {
+    clearErr('runErr');
+    if (!selectedTurnId || !selectedProjectPath) return;
+    document.getElementById('runLog').textContent = '';
+    document.getElementById('handoffBtn').disabled = true;
+    invoke('handoff_to_codex', {
+      turnId: selectedTurnId,
+      projectId: selectedProjectId,
+      projectPath: selectedProjectPath,
+    }).then(function (runId) {
+      activeRunId = runId;
+      document.getElementById('cancelBtn').disabled = false;
+      appendLog('[provider_run] ' + runId + ' (codex, handoff from prior context)');
+    }).catch(function (e) {
+      showErr('runErr', e);
+    }).finally(function () {
+      document.getElementById('handoffBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('detectOllamaBtn').addEventListener('click', function () {
+    var el = document.getElementById('detectOllamaResult');
+    el.textContent = 'בודק...';
+    invoke('detect_ollama').then(function (r) {
+      el.textContent = r.installed
+        ? ('✓ מותקן — ' + r.version + (r.path ? ' (' + r.path + ')' : ''))
+        : '✗ לא נמצא ollama ב-PATH';
+    }).catch(function (e) { el.textContent = String(e); });
+  });
+
+  document.getElementById('runOllamaBtn').addEventListener('click', function () {
+    clearErr('runErr');
+    if (!selectedTurnId) return;
+    document.getElementById('runLog').textContent = '';
+    document.getElementById('runOllamaBtn').disabled = true;
+    currentTurnIntent().then(function (intent) {
+      return invoke('run_ollama', { turnId: selectedTurnId, prompt: intent, model: null });
+    }).then(function (runId) {
+      activeRunId = runId;
+      document.getElementById('cancelBtn').disabled = false;
+      appendLog('[provider_run] ' + runId + ' (ollama, direct)');
+    }).catch(function (e) {
+      showErr('runErr', e);
+    }).finally(function () {
+      document.getElementById('runOllamaBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('detectGeminiBtn').addEventListener('click', function () {
+    var el = document.getElementById('detectGeminiResult');
+    el.textContent = 'בודק...';
+    invoke('detect_gemini').then(function (r) {
+      el.textContent = r.installed
+        ? ('✓ מותקן — ' + r.version + (r.path ? ' (' + r.path + ')' : ''))
+        : '✗ לא נמצא gemini ב-PATH';
+    }).catch(function (e) { el.textContent = String(e); });
+  });
+
+  document.getElementById('runGeminiBtn').addEventListener('click', function () {
+    clearErr('runErr');
+    if (!selectedTurnId || !selectedProjectPath) return;
+    document.getElementById('runLog').textContent = '';
+    document.getElementById('runGeminiBtn').disabled = true;
+    currentTurnIntent().then(function (intent) {
+      return invoke('run_gemini', {
+        turnId: selectedTurnId,
+        projectId: selectedProjectId,
+        projectPath: selectedProjectPath,
+        prompt: intent,
+      });
+    }).then(function (runId) {
+      activeRunId = runId;
+      document.getElementById('cancelBtn').disabled = false;
+      appendLog('[provider_run] ' + runId + ' (gemini, direct — UNVERIFIED parser)');
+    }).catch(function (e) {
+      showErr('runErr', e);
+    }).finally(function () {
+      document.getElementById('runGeminiBtn').disabled = false;
+    });
+  });
+
+  refreshProjects();
+})();
+</script>
+</body>
+</html>

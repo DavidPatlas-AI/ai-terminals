@@ -1,0 +1,14 @@
+{
+  "name": "desktop-app",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "test:ui": "node tests/lite.test.cjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "jsdom": "^29.1.1"
+  }
+}
