@@ -129,3 +129,22 @@ pub fn login(tool: &str, data: &Path) -> Result<(),String> {
         assert!(resolve("../codex").is_none());
     }
 }
+
+/// Only fixed vendor help URLs can be opened from the setup action.
+pub fn tool_help(tool:&str)->Result<(),String> {
+    let url=match tool {
+        "claude"=>"https://code.claude.com/docs/en/setup",
+        "codex"=>"https://developers.openai.com/codex/cli/",
+        "gemini"=>"https://geminicli.com/docs/get-started/installation/",
+        "grok"=>"https://grok.com/",
+        "ollama"=>"https://ollama.com/download",
+        _=>return Err("Unknown tool".into()),
+    };
+    #[cfg(windows)] let mut command={
+        let system=std::env::var_os("SystemRoot").map(PathBuf::from).unwrap_or_else(||PathBuf::from("C:/Windows"));
+        let mut c=Command::new(system.join("System32/rundll32.exe"));c.arg("url.dll,FileProtocolHandler").arg(url);c
+    };
+    #[cfg(target_os="macos")] let mut command={let mut c=Command::new("/usr/bin/open");c.arg(url);c};
+    #[cfg(target_os="linux")] let mut command={let mut c=resolve("xdg-open").ok_or("No default browser launcher found")?.command();c.arg(url);c};
+    hide(&mut command);command.spawn().map(|_|()).map_err(|e|e.to_string())
+}

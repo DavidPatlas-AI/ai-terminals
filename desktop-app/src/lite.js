@@ -54,7 +54,7 @@
   function renderTools() {
     const tool=state.tools.find(t=>t.id===state.provider);
     $('provider').value=state.provider;
-    $('connect').replaceChildren(icon(state.provider==='ollama'?'settings':'key'),document.createTextNode(state.provider==='ollama'?'בדיקת מודלים':state.provider==='deepseek'?'פרטי חיבור':'חיבור חשבון'));
+    $('connect').replaceChildren(icon(state.provider==='ollama'?'settings':'key'),document.createTextNode(state.provider==='ollama'?'בדיקת מודלים':state.provider==='deepseek'?'פרטי חיבור':!tool?.installed?'עזרה והתקנה':'חיבור חשבון'));
     $('providerDot').style.backgroundColor=colors[state.provider];
     $('connection').textContent=preview?'תצוגה מקדימה':!tool?.installed?'לא זוהה במחשב':tool.lastStatus==='success'?'אימות קודם תקין':tool.lastStatus==='error'?'נדרש לבדוק חיבור':state.provider==='deepseek'?'API · דורש מפתח ויתרה':'מזוהה במחשב';
     const strip=document.querySelector('.tool-strip');strip.replaceChildren();
@@ -216,11 +216,32 @@
     const tool=state.tools.find(t=>t.id===active.provider);if(tool)tool.lastStatus=status;
     state.active=null;state.busy=false;pending.clear();renderTools();if(scroll)scrollEnd(true);remember();
   }
-  $('connect').onclick=async()=>{if(state.provider==='deepseek'){notice('DeepSeek עובד עם מפתח API ויתרה בחשבון. המפתח הקיים של AI Terminals נקרא אוטומטית, אם הוא זמין.');return;}try{await invoke('open_connected_login',{tool:state.provider});notice(state.provider==='ollama'?'נפתח חלון בדיקת המודלים המקומיים. אחרי הבדיקה אפשר לחזור ולהמשיך כאן.':'נפתח חלון ההתחברות הרשמי. השלם בו את ההתחברות וחזור לכאן.');}catch(error){notice(readableError(error));}};
+  $('connect').onclick=async()=>{if(state.provider==='deepseek'){notice('DeepSeek עובד עם מפתח API ויתרה בחשבון. המפתח הקיים של AI Terminals נקרא אוטומטית, אם הוא זמין.');return;}try{const action=await invoke('open_connected_login',{tool:state.provider});if(action?.kind==='install'){notice('נפתח עמוד העזרה הרשמי. אחרי ההתקנה חזור לכאן; הכלי יזוהה מחדש ואפשר יהיה להתחבר לחשבון.');return;}notice(state.provider==='ollama'?'נפתח חלון בדיקת המודלים המקומיים. אחרי הבדיקה אפשר לחזור ולהמשיך כאן.':'נפתח חלון ההתחברות הרשמי. השלם בו את ההתחברות וחזור לכאן.');}catch(error){notice(readableError(error));}};
   const dialog=$('settingsDialog');
-  $('settings').onclick=()=>{if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');};
-  $('closeSettings').onclick=()=>{if(dialog.close)dialog.close();else dialog.removeAttribute('open');};
-  dialog.addEventListener('click',event=>{if(event.target===dialog&&dialog.getBoundingClientRect){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}});
+  let fallbackBackdrop=null;
+  function closeSettings() {
+    if(dialog.dataset.fallback)dialog.removeAttribute('open');else if(dialog.close)dialog.close();else dialog.removeAttribute('open');
+    if(fallbackBackdrop){fallbackBackdrop.remove();fallbackBackdrop=null;document.querySelector('.shell').removeAttribute('aria-hidden');delete dialog.dataset.fallback;}
+    $('settings').focus();
+  }
+  $('settings').onclick=()=>{
+    if(dialog.hasAttribute('open'))return;
+    if(dialog.showModal){dialog.showModal();return;}
+    fallbackBackdrop=document.createElement('div');fallbackBackdrop.className='dialog-shade';fallbackBackdrop.onclick=closeSettings;document.body.append(fallbackBackdrop);
+    dialog.dataset.fallback='true';dialog.setAttribute('open','');dialog.setAttribute('aria-modal','true');document.querySelector('.shell').setAttribute('aria-hidden','true');$('closeSettings').focus();
+  };
+  $('closeSettings').onclick=closeSettings;
+  dialog.addEventListener('keydown',event=>{
+    if(!dialog.dataset.fallback)return;
+    if(event.key==='Escape'){event.preventDefault();closeSettings();}
+    if(event.key==='Tab'){
+      const controls=Array.from(dialog.querySelectorAll('button,input,select')).filter(el=>!el.disabled);
+      const first=controls[0],last=controls[controls.length-1];
+      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+    }
+  });
+  dialog.addEventListener('click',event=>{if(event.target===dialog&&dialog.getBoundingClientRect){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeSettings();}});
   $('economy').onchange=()=>{state.economy=$('economy').checked;updateControls();remember();};
   $('classic').onclick=async()=>{try{await invoke('open_classic_window');}catch(error){notice(String(error));}};
   let theme='system';try{theme=localStorage.getItem('box-lite-theme')||'system';}catch{}
@@ -242,5 +263,11 @@
     }catch(error){notice('לא ניתן לטעון את סביבת העבודה. '+String(error));}
     finally{state.loading=false;updateControls();}
   }
+  let refreshedAt=0;
+  window.addEventListener('focus',async()=>{
+    if(preview||state.busy||state.loading||Date.now()-refreshedAt<2000)return;
+    refreshedAt=Date.now();
+    try{const latest=await invoke('lite_bootstrap');state.tools=latest.tools;renderTools();}catch{}
+  });
   init();
 })();

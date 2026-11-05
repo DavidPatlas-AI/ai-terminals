@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: ['test/the-box-lite-*']
-    paths: ['desktop-app/**', '.github/workflows/desktop-lite.yml']
+    paths: ['desktop-app/src/**', 'desktop-app/src-tauri/**', 'desktop-app/tests/**', 'desktop-app/package*.json', '.github/workflows/desktop-lite.yml']
 permissions:
   contents: read
 jobs:
@@ -61,13 +61,49 @@ jobs:
           workspaces: desktop-app/src-tauri -> target
       - run: npm ci
       - run: npm run test:ui
+      - name: Render desktop and narrow-window previews
+        if: matrix.name == 'Linux x64'
+        run: |
+          mkdir -p visual-checks
+          google-chrome --headless --no-sandbox --disable-gpu --hide-scrollbars --no-first-run --virtual-time-budget=2000 --window-size=1360,850 --screenshot=visual-checks/desktop.png "file://$PWD/src/lite.html"
+          google-chrome --headless --no-sandbox --disable-gpu --hide-scrollbars --no-first-run --virtual-time-budget=2000 --window-size=430,850 --screenshot=visual-checks/narrow.png "file://$PWD/src/lite.html"
+      - uses: actions/upload-artifact@v4
+        if: matrix.name == 'Linux x64'
+        with:
+          name: the-box-lite-visual-previews
+          path: desktop-app/visual-checks/
+          if-no-files-found: error
+          retention-days: 14
       - name: Tests without live accounts
         run: cargo test --manifest-path src-tauri/Cargo.toml --lib
       - name: Build platform installer
         run: npm run tauri -- build --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: Smoke test production worker
+        run: node tests/worker-smoke.cjs src-tauri/target/${{ matrix.target }}/release/desktop-app
+      - name: Verify Windows installer lifecycle
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./tests/install-smoke.ps1 -Target ${{ matrix.target }}
+      - name: Verify Linux and macOS packages
+        if: runner.os != 'Windows'
+        run: bash tests/install-smoke.sh ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         with:
           name: the-box-lite-${{ matrix.target }}-unsigned
           path: desktop-app/src-tauri/target/${{ matrix.target }}/release/bundle/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Prepare Windows portable application
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force portable | Out-Null
+          Copy-Item -LiteralPath "src-tauri/target/${{ matrix.target }}/release/desktop-app.exe" -Destination portable/TheBoxLite.exe
+          Set-Content -LiteralPath portable/README.txt -Value 'The Box Lite 0.2 — test build, not digitally signed. Requires Microsoft WebView2. Uses your existing CLI accounts. No installer is required for this portable copy.'
+      - uses: actions/upload-artifact@v4
+        if: runner.os == 'Windows'
+        with:
+          name: the-box-lite-${{ matrix.target }}-portable-unsigned
+          path: desktop-app/portable/
           if-no-files-found: error
           retention-days: 14

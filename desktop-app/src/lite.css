@@ -5,3 +5,5 @@
 @media(prefers-reduced-motion:no-preference){.icon-button,.quiet-button,.suggestions button,.new-chat{transition:background-color .12s,border-color .12s}.sidebar{transition:transform .16s ease,visibility .16s}}
 
 .box-mark{transform:none}.box-mark svg{width:24px;height:24px;stroke-width:1.35}.welcome-mark{width:68px;height:68px;display:inline-grid;place-items:center;background:var(--accent-soft);border-radius:20px;transform:none}.welcome-mark svg{width:36px;height:36px;stroke-width:1.2}.assistant-avatar svg{width:17px;height:17px;stroke-width:1.4}.message pre{direction:ltr;text-align:left;white-space:pre;overflow:auto;padding:15px;border:1px solid var(--line);background:var(--side);border-radius:10px;font:12px/1.8 Consolas,monospace;max-width:100%}.shell{height:100vh;height:100dvh}dialog:not([open]){display:none}
+
+.dialog-shade{position:fixed;inset:0;background:#17221a66;z-index:40}dialog[data-fallback][open]{position:fixed;top:50%;left:50%;right:auto;margin:0;transform:translate(-50%,-50%);z-index:41;max-height:calc(100vh - 32px);overflow:auto}

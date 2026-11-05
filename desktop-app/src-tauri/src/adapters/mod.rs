@@ -66,6 +66,10 @@ impl RunControl {
         Self::default()
     }
 
+    pub fn active_runs(&self) -> Vec<(String,u32)> {
+        self.pids.lock().unwrap().iter().map(|(id,pid)|(id.clone(),*pid)).collect()
+    }
+
     pub fn register(&self, run_id: &str, pid: u32) {
         self.pids.lock().unwrap().insert(run_id.to_string(), pid);
     }
@@ -97,8 +101,10 @@ mod tests {
         assert_eq!(rc.pid_of("r1"), None);
         rc.register("r1", 1234);
         assert_eq!(rc.pid_of("r1"), Some(1234));
+        assert_eq!(rc.active_runs(), vec![("r1".to_string(),1234)]);
         rc.unregister("r1");
         assert_eq!(rc.pid_of("r1"), None);
+        assert!(rc.active_runs().is_empty());
     }
 
     #[test]

@@ -206,10 +206,10 @@ fn db_create_turn(
     user_intent: String,
 ) -> Result<Turn, String> {
     let conn = state.0.lock().map_err(|e| e.to_string())?;
-    let next_seq = repository::list_turns_for_conversation(&conn, &conversation_id)
-        .map_err(|e| e.to_string())?
-        .len() as i64
-        + 1;
+    let next_seq: i64 = conn.query_row(
+        "SELECT COALESCE(MAX(seq),0)+1 FROM turns WHERE conversation_id=?1",
+        [&conversation_id], |row| row.get(0)
+    ).map_err(|e| e.to_string())?;
     repository::create_turn(&conn, &conversation_id, next_seq, &user_intent)
         .map_err(|e| e.to_string())
 }
@@ -619,9 +619,15 @@ fn run_connected_chat(app: tauri::AppHandle, state: State<DbState>, control: Sta
 }
 
 #[tauri::command]
-fn open_connected_login(app: tauri::AppHandle, tool: String) -> Result<(),String> {
+fn open_connected_login(app: tauri::AppHandle, tool: String) -> Result<serde_json::Value,String> {
+    if !adapters::connected::valid_tool(&tool) {return Err("Unknown tool".into());}
+    if tool!="deepseek" && platform::resolve(&tool).is_none() {
+        platform::tool_help(&tool)?;
+        return Ok(serde_json::json!({"kind":"install"}));
+    }
     let data=app.path().app_data_dir().map_err(|e|e.to_string())?;
-    platform::login(&tool,&data)
+    platform::login(&tool,&data)?;
+    Ok(serde_json::json!({"kind":"login"}))
 }
 
 
@@ -734,6 +740,16 @@ pub fn run() {
             detect_gemini,
             run_gemini
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app,event| {
+            if matches!(event,tauri::RunEvent::Exit) {
+                if let Some(control)=app.try_state::<RunControl>() {
+                    for (run_id,pid) in control.active_runs() {
+                        control.mark_cancelled(&run_id);
+                        let _=platform::terminate(pid);
+                    }
+                }
+            }
+        });
 }

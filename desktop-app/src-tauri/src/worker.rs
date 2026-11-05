@@ -62,12 +62,25 @@ fn legacy_key(root:&Path)->Option<String> {
     None
 }
 
+fn choose_local_model(tags:&Value,requested:Option<&str>)->Result<String,String> {
+    let models=tags["models"].as_array().ok_or("No local models installed")?;
+    let local=|m:&&Value| {
+        let name=m["name"].as_str().unwrap_or("").to_ascii_lowercase();
+        !name.is_empty()&&!name.ends_with(":cloud")&&!name.ends_with("-cloud")&&!m["remote_host"].is_string()&&!m["remote_model"].is_string()
+    };
+    if let Some(name)=requested {
+        return models.iter().filter(local).find(|m|m["name"]==name||m["name"]==format!("{name}:latest"))
+            .and_then(|m|m["name"].as_str()).map(str::to_string).ok_or_else(||"No local model matching the selection is installed".into());
+    }
+    models.iter().filter(local).min_by_key(|m|m["size"].as_u64().filter(|s|*s>0).unwrap_or(u64::MAX))
+        .and_then(|m|m["name"].as_str()).map(str::to_string).ok_or_else(||"No local models installed. Cloud-only entries were not started.".into())
+}
+
 fn service(req:&Value,tool:&str,prompt:&str)->Result<(),String> {
     let max=if req["economy"].as_bool().unwrap_or(true) {768} else {2048};
     if tool=="ollama" {
         let tags=http("http://127.0.0.1:11434/api/tags",None,None)?;
-        let model=req["model"].as_str().or_else(||tags["models"][0]["name"].as_str())
-            .ok_or("No local model is installed. No download was started.")?;
+        let model=choose_local_model(&tags,req["model"].as_str())?;
         let r=http("http://127.0.0.1:11434/api/generate",Some(json!({"model":model,"prompt":prompt,"stream":false,"options":{"num_predict":max}})),None)?;
         let answer=r["response"].as_str().filter(|s|!s.is_empty()).ok_or("No local answer was returned")?;
         if r["done"]!=true {return Err("Local answer did not complete".into());}
@@ -177,6 +190,13 @@ pub fn run()->i32 {
 
 #[cfg(test)] mod tests {
     use super::*;
+    #[test] fn local_selection_skips_cloud_and_prefers_the_smallest_downloaded_model() {
+        let tags=json!({"models":[{"name":"large:latest","size":9000000},{"name":"model:cloud","size":0},{"name":"old-cloud:latest","remote_host":"https://example.invalid","size":0},{"name":"small:latest","size":1000}]});
+        assert_eq!(choose_local_model(&tags,None).unwrap(),"small:latest");
+        assert_eq!(choose_local_model(&tags,Some("large")).unwrap(),"large:latest");
+        assert!(choose_local_model(&tags,Some("model:cloud")).is_err());
+        assert!(choose_local_model(&json!({"models":[{"name":"model:cloud","size":0}]}),None).is_err());
+    }
     #[test] fn no_shell_or_auto_approval_in_chat_args() {
         assert!(cli_args("claude").windows(2).any(|w|w[0]=="--tools" && w[1].is_empty()));
         assert!(cli_args("grok").windows(2).any(|w|w[0]=="--tools" && w[1].is_empty()));

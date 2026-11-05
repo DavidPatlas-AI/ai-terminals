@@ -33,6 +33,9 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "One quiet workspace for your local AI tools"
+    "shortDescription": "One quiet workspace for your local AI tools",
+    "macOS": {
+      "minimumSystemVersion": "12.0"
+    }
   }
 }
